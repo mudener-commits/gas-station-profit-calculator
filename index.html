@@ -2254,11 +2254,20 @@
 
     function loadImage(src) {
       return new Promise((resolve, reject) => {
-        const image = new Image();
-        image.crossOrigin = "anonymous";
-        image.onload = () => resolve(image);
-        image.onerror = reject;
-        image.src = src;
+        const tryLoad = (useCrossOrigin) => {
+          const image = new Image();
+          if (useCrossOrigin) image.crossOrigin = "anonymous";
+          image.onload = () => resolve(image);
+          image.onerror = () => {
+            if (useCrossOrigin) {
+              tryLoad(false);
+              return;
+            }
+            reject();
+          };
+          image.src = src;
+        };
+        tryLoad(true);
       });
     }
 
@@ -2475,7 +2484,7 @@
       const context = getReportContext(result);
       const canvas = document.createElement("canvas");
       canvas.width = 1080;
-      canvas.height = 2380;
+      canvas.height = 2860;
       const ctx = canvas.getContext("2d");
       const blue = "#004b8d";
       const midBlue = "#0067b1";
@@ -2483,14 +2492,14 @@
       const ink = "#0b1f33";
       const muted = "#657789";
 
-      const bg = ctx.createLinearGradient(0, 0, 1080, 2380);
+      const bg = ctx.createLinearGradient(0, 0, 1080, 2860);
       bg.addColorStop(0, "#f6fbff");
       bg.addColorStop(0.55, "#edf7fd");
       bg.addColorStop(1, "#ffffff");
       ctx.fillStyle = bg;
-      ctx.fillRect(0, 0, 1080, 2380);
+      ctx.fillRect(0, 0, 1080, 2860);
 
-      drawRoundRect(ctx, 60, 60, 960, 2260, 34);
+      drawRoundRect(ctx, 60, 60, 960, 2740, 34);
       ctx.fillStyle = "#ffffff";
       ctx.shadowColor = "rgba(11, 45, 78, .14)";
       ctx.shadowBlur = 34;
@@ -2565,12 +2574,15 @@
         y = wrapCanvasText(ctx, item[1], 110, y + 34, 860, 31, 2) + 12;
       });
 
+      const disclaimerY = y + 28;
+      const footerY = disclaimerY + 140;
+
       ctx.fillStyle = "#f2f8fc";
-      drawRoundRect(ctx, 110, 2125, 860, 94, 18);
+      drawRoundRect(ctx, 110, disclaimerY, 860, 104, 18);
       ctx.fill();
       ctx.fillStyle = muted;
       ctx.font = "400 21px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
-      wrapCanvasText(ctx, "免责声明：本工具测算结果基于用户自行填写的数据和系统内置估算公式，仅用于经营参考，不构成税务、财务、法律或投资建议，不作为纳税申报依据。", 138, 2162, 804, 28, 2);
+      wrapCanvasText(ctx, "免责声明：本工具测算结果基于用户自行填写的数据和系统内置估算公式，仅用于经营参考，不构成税务、财务、法律或投资建议，不作为纳税申报依据。", 138, disclaimerY + 38, 804, 28, 2);
 
       let qrImage = null;
       let avatarImage = null;
@@ -2584,38 +2596,38 @@
         avatarImage = null;
       }
 
-      drawRoundRect(ctx, 110, 2250, 76, 76, 14);
+      drawRoundRect(ctx, 110, footerY, 76, 76, 14);
       ctx.fillStyle = "#e7f4fb";
       ctx.fill();
       ctx.save();
-      drawRoundRect(ctx, 110, 2250, 76, 76, 14);
+      drawRoundRect(ctx, 110, footerY, 76, 76, 14);
       ctx.clip();
-      if (qrImage) drawImageCover(ctx, qrImage, 110, 2250, 76, 76);
+      if (qrImage) drawImageCover(ctx, qrImage, 110, footerY, 76, 76);
       ctx.restore();
 
       ctx.save();
       ctx.beginPath();
-      ctx.arc(226, 2276, 24, 0, Math.PI * 2);
+      ctx.arc(226, footerY + 26, 24, 0, Math.PI * 2);
       ctx.clip();
       if (avatarImage) {
-        drawImageCover(ctx, avatarImage, 202, 2252, 48, 48);
+        drawImageCover(ctx, avatarImage, 202, footerY + 2, 48, 48);
       } else {
         ctx.fillStyle = "#dcecf6";
-        ctx.fillRect(202, 2252, 48, 48);
+        ctx.fillRect(202, footerY + 2, 48, 48);
       }
       ctx.restore();
       ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 5;
       ctx.beginPath();
-      ctx.arc(226, 2276, 24, 0, Math.PI * 2);
+      ctx.arc(226, footerY + 26, 24, 0, Math.PI * 2);
       ctx.stroke();
 
       ctx.fillStyle = ink;
       ctx.font = "700 23px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
-      canvasText(ctx, "加油站漫谈", 272, 2272, 650);
+      canvasText(ctx, "加油站漫谈", 272, footerY + 22, 650);
       ctx.fillStyle = muted;
       ctx.font = "400 20px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
-      canvasText(ctx, "欢迎关注公众号，交流油站经营、利润测算和合规管理", 272, 2304, 650);
+      canvasText(ctx, "欢迎关注公众号，交流油站经营、利润测算和合规管理", 272, footerY + 54, 650);
 
       return canvas;
     }
