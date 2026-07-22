@@ -1,0 +1,2808 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>加油站利润计算器（合规经营）H5</title>
+  <meta name="description" content="面向民营加油站经营者的合规经营年度净利润测算工具。" />
+  <style>
+    :root {
+      --bg: #f3f8fc;
+      --panel: #ffffff;
+      --ink: #0b1f33;
+      --muted: #657789;
+      --line: #dbe8f2;
+      --soft: #eaf5fb;
+      --green: #0067b1;
+      --green-2: #004b8d;
+      --amber: #00a3e0;
+      --red: #c64646;
+      --blue: #0072bc;
+      --shadow: 0 18px 42px rgba(11, 45, 78, .10);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background:
+        linear-gradient(135deg, rgba(0, 103, 177, .09), transparent 28%),
+        linear-gradient(180deg, #f5fbff 0%, #edf6fc 48%, #ffffff 100%);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app-shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      margin: -18px -18px 18px;
+      padding: 14px 18px;
+      background: rgba(245, 251, 255, .95);
+      border-bottom: 1px solid rgba(0, 103, 177, .16);
+      backdrop-filter: blur(14px);
+    }
+
+    .topbar-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--green-2), var(--amber));
+      color: #fff;
+      border: 2px solid rgba(255, 255, 255, .74);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(18px, 2.6vw, 24px);
+      line-height: 1.15;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .page-tabs {
+      max-width: 1180px;
+      margin: 0 auto 16px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      padding: 6px;
+      border: 1px solid rgba(0, 103, 177, .16);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .78);
+      box-shadow: 0 10px 26px rgba(11, 45, 78, .07);
+    }
+
+    .page-tabs button {
+      min-height: 44px;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .page-tabs button.active {
+      background: linear-gradient(135deg, var(--green-2), var(--blue));
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(0, 103, 177, .22);
+    }
+
+    .page-view {
+      display: none;
+    }
+
+    .page-view.active {
+      display: block;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(320px, .92fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .input-stack, .result-stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(90deg, #f7fbfe, #ffffff);
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .section-note {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .section-body {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid.four {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    label.field {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .field span {
+      color: #17324a;
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid #cddde9;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 9px 10px;
+      outline: none;
+      transition: border-color .16s ease, box-shadow .16s ease;
+    }
+
+    .field input:focus, .field select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(0, 103, 177, .12);
+    }
+
+    .switch-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #f7fbfe;
+    }
+
+    .switch-row strong {
+      font-size: 14px;
+    }
+
+    .switch-row small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      user-select: none;
+    }
+
+    .toggle input {
+      width: 38px;
+      height: 22px;
+      appearance: none;
+      border-radius: 999px;
+      background: #bfd4e5;
+      position: relative;
+      margin: 0;
+      transition: background .16s ease;
+    }
+
+    .toggle input::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      top: 2px;
+      left: 2px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .2);
+      transition: transform .16s ease;
+    }
+
+    .toggle input:checked {
+      background: var(--green);
+    }
+
+    .toggle input:checked::after {
+      transform: translateX(16px);
+    }
+
+    .segmented {
+      display: inline-grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #e8f3fa;
+    }
+
+    .segmented button {
+      min-height: 32px;
+      border-radius: 6px;
+      padding: 6px 10px;
+      background: transparent;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .segmented button.active {
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+    }
+
+    .advanced {
+      display: none;
+      padding-top: 2px;
+    }
+
+    .advanced.active {
+      display: grid;
+      gap: 12px;
+    }
+
+    .btn {
+      min-height: 40px;
+      border-radius: 8px;
+      padding: 10px 14px;
+      background: var(--green);
+      color: #fff;
+      font-weight: 700;
+      transition: transform .14s ease, background .14s ease;
+    }
+
+    .btn:hover {
+      background: var(--green-2);
+      transform: translateY(-1px);
+    }
+
+    .btn.secondary {
+      background: #eef6fb;
+      color: var(--green-2);
+      border: 1px solid #cfe1ee;
+    }
+
+    .btn.secondary:hover {
+      background: #e4f1f8;
+    }
+
+    .btn.neutral {
+      background: #f3f7fa;
+      color: #17324a;
+      border: 1px solid var(--line);
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+      transform: none;
+    }
+
+    .calc-action {
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+    }
+
+    .calc-start {
+      min-height: 52px;
+      width: 100%;
+      font-size: 18px;
+      background: linear-gradient(135deg, var(--green-2), var(--blue));
+      box-shadow: 0 14px 28px rgba(0, 103, 177, .20);
+    }
+
+    .calc-action-copy {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .result-sticky {
+      position: sticky;
+      top: 84px;
+    }
+
+    .hero-result {
+      background:
+        radial-gradient(circle at top right, rgba(0, 163, 224, .22), transparent 40%),
+        linear-gradient(135deg, #ffffff 0%, #edf7fd 52%, #e4f2fb 100%);
+      border: 1px solid #cfe1ee;
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .profit-label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .profit-value {
+      margin: 8px 0 4px;
+      font-size: clamp(34px, 6vw, 56px);
+      line-height: 1;
+      font-weight: 850;
+      color: var(--green-2);
+    }
+
+    .profit-value.loss {
+      color: var(--red);
+    }
+
+    .profit-sub {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .kpi {
+      border: 1px solid #d8e7f1;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .72);
+      padding: 10px;
+      min-width: 0;
+    }
+
+    .kpi span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .kpi strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 18px;
+      white-space: nowrap;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .line-item {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 7px 0;
+      border-bottom: 1px dashed #d9e6ef;
+      font-size: 14px;
+    }
+
+    .line-item:last-child {
+      border-bottom: 0;
+    }
+
+    .line-item span {
+      color: var(--muted);
+    }
+
+    .line-item strong {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .line-item.total {
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+      border-bottom: 0;
+    }
+
+    .alert {
+      display: none;
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fff8e8;
+      border: 1px solid #f0d493;
+      color: #76510e;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .alert.active {
+      display: block;
+    }
+
+    .fee-tip {
+      margin: -4px 0 2px;
+      color: #c64646;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .share-card {
+      width: 100%;
+      border-radius: var(--radius);
+      border: 1px solid #d7e6f0;
+      background:
+        radial-gradient(circle at top left, rgba(0, 163, 224, .16), transparent 34%),
+        linear-gradient(160deg, #ffffff 0%, #eef8fd 100%);
+      padding: 18px;
+    }
+
+    .share-card h3 {
+      margin: 0 0 14px;
+      font-size: 18px;
+    }
+
+    .share-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #e1eae5;
+    }
+
+    .share-row span {
+      color: var(--muted);
+    }
+
+    .share-row strong {
+      white-space: nowrap;
+    }
+
+    .qr-placeholder {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 86px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+    }
+
+    .qr-box {
+      width: 86px;
+      height: 86px;
+      border-radius: 8px;
+      border: 1px solid #bfd8e9;
+      background:
+        linear-gradient(90deg, rgba(0, 103, 177, .22) 25%, transparent 25% 50%, rgba(0, 103, 177, .22) 50% 75%, transparent 75%),
+        linear-gradient(rgba(0, 163, 224, .22) 25%, transparent 25% 50%, rgba(0, 163, 224, .22) 50% 75%, transparent 75%);
+      background-size: 22px 22px;
+    }
+
+    .qr-image {
+      width: 86px;
+      height: 86px;
+      border-radius: 8px;
+      border: 1px solid #bfd8e9;
+      object-fit: cover;
+      background: #fff;
+    }
+
+    .official-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .official-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(11, 45, 78, .16);
+    }
+
+    .official-brand strong {
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .qr-placeholder p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #f7fbfe;
+      color: inherit;
+      text-align: left;
+    }
+
+    .history-item strong, .history-item span {
+      display: block;
+    }
+
+    .history-item span {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .small {
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .mobile-actions {
+      display: none;
+      position: sticky;
+      bottom: 0;
+      z-index: 6;
+      margin: 18px -18px -18px;
+      padding: 10px 18px;
+      background: rgba(245, 251, 255, .94);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+      gap: 8px;
+    }
+
+    .report-hero {
+      min-height: 260px;
+      border-radius: var(--radius);
+      border: 1px solid #c7dfef;
+      background:
+        linear-gradient(115deg, rgba(6, 35, 62, .88), rgba(0, 75, 141, .76)),
+        radial-gradient(circle at 86% 16%, rgba(0, 163, 224, .5), transparent 28%),
+        linear-gradient(135deg, var(--green-2), var(--blue));
+      color: #fff;
+      padding: clamp(20px, 4vw, 34px);
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr);
+      gap: 18px;
+      align-items: end;
+      box-shadow: var(--shadow);
+    }
+
+    .report-hero h2 {
+      margin: 0;
+      font-size: clamp(26px, 5vw, 48px);
+      line-height: 1.08;
+    }
+
+    .report-hero p {
+      margin: 12px 0 0;
+      color: rgba(255, 255, 255, .82);
+      line-height: 1.6;
+      max-width: 620px;
+    }
+
+    .report-profit {
+      border: 1px solid rgba(255, 255, 255, .34);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .12);
+      padding: 18px;
+      backdrop-filter: blur(8px);
+    }
+
+    .report-profit span {
+      display: block;
+      color: rgba(255, 255, 255, .74);
+      font-size: 13px;
+    }
+
+    .report-profit strong {
+      display: block;
+      margin-top: 8px;
+      font-size: clamp(28px, 5vw, 44px);
+      line-height: 1;
+      color: #dff5ff;
+    }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .report-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      min-width: 0;
+    }
+
+    .report-card h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .report-metric {
+      display: grid;
+      gap: 5px;
+      padding: 11px 0;
+      border-bottom: 1px dashed #d8e7f1;
+    }
+
+    .report-metric:last-child {
+      border-bottom: 0;
+    }
+
+    .report-metric span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .report-metric strong {
+      font-size: 22px;
+      white-space: nowrap;
+    }
+
+    .meter {
+      height: 10px;
+      border-radius: 999px;
+      background: #dcecf6;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .meter i {
+      display: block;
+      height: 100%;
+      width: 0%;
+      max-width: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--green-2), var(--amber));
+    }
+
+    .report-actions-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .report-share-panel {
+      margin-top: 14px;
+    }
+
+    .full-report-preview {
+      border: 1px solid #cfe1ee;
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, #ffffff 0%, #f5fbff 100%);
+      padding: 18px;
+    }
+
+    .full-report-preview h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      color: var(--green-2);
+    }
+
+    .full-report-preview p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .full-report-preview .share-row:last-child {
+      border-bottom: 0;
+    }
+
+    .action-item {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 10px;
+      border: 1px solid #d7e6f0;
+      border-radius: 8px;
+      background: #f7fbfe;
+    }
+
+    .action-item b {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--green-2);
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .action-item strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .action-item span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .formula-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .formula-block {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f7fbfe;
+      overflow: hidden;
+    }
+
+    .formula-title {
+      padding: 14px 16px;
+      font-weight: 800;
+      color: var(--green-2);
+      border-bottom: 1px solid var(--line);
+      background: #ffffff;
+    }
+
+    .formula-content {
+      padding: 0 16px 16px;
+      color: #17324a;
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .formula-content code {
+      display: block;
+      margin: 8px 0;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      white-space: normal;
+    }
+
+    .message-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .message-form textarea {
+      width: 100%;
+      min-height: 132px;
+      resize: vertical;
+      border: 1px solid #cddde9;
+      border-radius: 8px;
+      padding: 10px;
+      color: var(--ink);
+      outline: none;
+    }
+
+    .message-form textarea:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(0, 103, 177, .12);
+    }
+
+    .message-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .message-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #f7fbfe;
+    }
+
+    .message-item strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .message-item p {
+      margin: 8px 0 0;
+      color: #17324a;
+      line-height: 1.55;
+      font-size: 13px;
+    }
+
+    .reply-box {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #eef6fb;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      place-items: center;
+      padding: 18px;
+      background: rgba(11, 31, 51, .42);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-backdrop.active {
+      display: grid;
+    }
+
+    .modal-card {
+      width: min(420px, 100%);
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 70px rgba(11, 31, 51, .22);
+      padding: 18px;
+    }
+
+    .modal-card h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .modal-card p {
+      margin: 8px 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .modal-card.wide {
+      width: min(560px, 100%);
+    }
+
+    .review-summary {
+      border-radius: 8px;
+      border: 1px solid #cfe1ee;
+      background: #f2f8fc;
+      padding: 10px 12px;
+      color: #17324a;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .review-list {
+      display: grid;
+      gap: 8px;
+      max-height: min(46vh, 420px);
+      overflow: auto;
+      margin-top: 12px;
+      padding-right: 2px;
+    }
+
+    .review-item {
+      border-radius: 8px;
+      border: 1px solid #f0d493;
+      background: #fff8e8;
+      color: #76510e;
+      padding: 9px 10px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .review-item.blocking {
+      border-color: #efb9b9;
+      background: #fff2f2;
+      color: #a33636;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .result-sticky {
+        position: static;
+      }
+
+      .report-hero {
+        grid-template-columns: 1fr;
+      }
+
+      .report-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app-shell {
+        padding: 14px;
+      }
+
+      .topbar {
+        margin: -14px -14px 14px;
+        padding: 12px 14px;
+      }
+
+      .brand h1 {
+        white-space: normal;
+      }
+
+      .brand p {
+        display: none;
+      }
+
+      .top-actions .btn.secondary {
+        display: none;
+      }
+
+      .page-tabs {
+        margin-bottom: 12px;
+      }
+
+      .grid, .grid.two, .grid.four {
+        grid-template-columns: 1fr;
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .mobile-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark">油</div>
+          <div>
+            <h1>加油站利润计算器（合规经营）</h1>
+            <p>H5 测算版 · 本地计算 · 结果可生成 PNG 图片</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button class="btn secondary" type="button" id="sampleBtn">填入示例</button>
+          <button class="btn neutral" type="button" id="resetBtn">清空</button>
+        </div>
+      </div>
+    </header>
+
+    <nav class="page-tabs" aria-label="页面切换">
+      <button class="active" type="button" data-page-target="calculatorPage">利润计算器</button>
+      <button type="button" data-page-target="reportPage">利润测算报告</button>
+      <button type="button" data-page-target="formulaPage">公式说明与留言</button>
+    </nav>
+
+    <section class="page-view active" id="calculatorPage">
+    <div class="layout">
+      <form class="input-stack" id="calculatorForm">
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">销量数据</h2>
+            <span class="section-note">升/天</span>
+          </div>
+          <div class="section-body grid">
+            <label class="field"><span>汽油 92# 日均销量</span><input id="vol92" type="number" inputmode="decimal" min="0" step="1" value="0"></label>
+            <label class="field"><span>汽油 95# 日均销量</span><input id="vol95" type="number" inputmode="decimal" min="0" step="1" value="0"></label>
+            <label class="field"><span>柴油日均销量</span><input id="volDiesel" type="number" inputmode="decimal" min="0" step="1" value="0"></label>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">油品毛利与价格</h2>
+            <div class="segmented" aria-label="毛利单位">
+              <button type="button" class="active" data-margin-unit="ton">按吨</button>
+              <button type="button" data-margin-unit="liter">按升</button>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="switch-row">
+              <div>
+                <strong>自定义吨油毛利</strong>
+                <small>关闭时使用默认毛利：92# 1.00 元/升，95# 1.30 元/升，柴油 0.30 元/升</small>
+              </div>
+              <label class="toggle">开启 <input id="customMargin" type="checkbox"></label>
+            </div>
+            <div class="advanced" id="marginPanel">
+              <div class="grid">
+                <label class="field"><span id="m92Label">92# 毛利 元/吨</span><input id="margin92" type="number" inputmode="decimal" min="0" step="0.01" value="1370"></label>
+                <label class="field"><span id="m95Label">95# 毛利 元/吨</span><input id="margin95" type="number" inputmode="decimal" min="0" step="0.01" value="1781"></label>
+                <label class="field"><span id="mDieselLabel">柴油毛利 元/吨</span><input id="marginDiesel" type="number" inputmode="decimal" min="0" step="0.01" value="357"></label>
+              </div>
+            </div>
+
+            <div class="switch-row">
+              <div>
+                <strong>自定义采购价/零售价</strong>
+                <small>精算时开启；关闭时按参考进价 + 毛利估算</small>
+              </div>
+              <label class="toggle">开启 <input id="customPrice" type="checkbox"></label>
+            </div>
+            <div class="advanced" id="pricePanel">
+              <div class="grid four">
+                <label class="field"><span>金额口径</span><select id="taxMode"><option value="gross">含税</option><option value="net">不含税</option></select></label>
+                <label class="field"><span>92# 采购价 元/吨</span><input id="purchase92" type="number" inputmode="decimal" min="0" step="0.01" value="7500"></label>
+                <label class="field"><span>92# 零售价 元/吨</span><input id="sale92" type="number" inputmode="decimal" min="0" step="0.01" value="8870"></label>
+                <label class="field"><span>95# 采购价 元/吨</span><input id="purchase95" type="number" inputmode="decimal" min="0" step="0.01" value="8000"></label>
+                <label class="field"><span>95# 零售价 元/吨</span><input id="sale95" type="number" inputmode="decimal" min="0" step="0.01" value="9781"></label>
+                <label class="field"><span>柴油采购价 元/吨</span><input id="purchaseDiesel" type="number" inputmode="decimal" min="0" step="0.01" value="6500"></label>
+                <label class="field"><span>柴油零售价 元/吨</span><input id="saleDiesel" type="number" inputmode="decimal" min="0" step="0.01" value="6857"></label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">人员成本</h2>
+            <div class="segmented" aria-label="工资输入模式">
+              <button type="button" class="active" data-wage-mode="people">按人头</button>
+              <button type="button" data-wage-mode="total">填总额</button>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="grid two" id="peopleWagePanel">
+              <label class="field"><span>员工人数</span><input id="employeeCount" type="number" inputmode="numeric" min="0" step="1" value="0"></label>
+              <label class="field"><span>人均月薪 元/月</span><input id="avgSalary" type="number" inputmode="decimal" min="0" step="100" value="0"></label>
+            </div>
+            <div class="advanced" id="totalWagePanel">
+              <label class="field"><span>员工月工资总额 元/月</span><input id="salaryTotal" type="number" inputmode="decimal" min="0" step="100" value="0"></label>
+            </div>
+            <div class="switch-row">
+              <div>
+                <strong>为员工缴纳社保</strong>
+                <small>按工资总额 32% 估算企业承担部分</small>
+              </div>
+              <label class="toggle">计入 <input id="hasSocial" type="checkbox" checked></label>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">运营费用</h2>
+            <span class="section-note">元/月</span>
+          </div>
+          <div class="section-body">
+            <div class="grid two">
+              <label class="field"><span>月综合运营费用</span><input id="opsCost" type="number" inputmode="decimal" min="0" step="100" value="0"></label>
+              <label class="field"><span>月赠品成本</span><input id="giftCost" type="number" inputmode="decimal" min="0" step="100" value="0"></label>
+            </div>
+            <p class="fee-tip">建议：非油业务建议单独注册营业执照并单独核算，税务处理上不要和加油站主体捆绑在一起。本工具暂不计入非油业务利润。</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">行政合规支出</h2>
+            <span class="section-note">元/年</span>
+          </div>
+          <div class="section-body">
+            <div class="switch-row">
+              <div>
+                <strong>证照及行政合规支出</strong>
+                <small>危化证换证、证照年检续期、行政合规等年度估算</small>
+              </div>
+              <label class="toggle">计入 <input id="hasLicense" type="checkbox" checked></label>
+            </div>
+            <label class="field"><span>证照及行政合规支出 元/年</span><input id="licenseCost" type="number" inputmode="decimal" min="0" step="100" value="5000"></label>
+            <input id="adminCost" type="hidden" value="0">
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">选填经营成本</h2>
+            <span class="section-note">不填按 0</span>
+          </div>
+          <div class="section-body">
+            <div class="grid two">
+              <label class="field"><span>土地/油站租金 元/年</span><input id="landRent" type="number" inputmode="decimal" min="0" step="1000" value="0"></label>
+              <label class="field"><span>资产折旧（设备、基础设施工程摊销等）元/年</span><input id="depreciation" type="number" inputmode="decimal" min="0" step="1000" value="0"></label>
+            </div>
+            <p class="muted small">财务成本：贷款利息、刷卡/支付手续费。</p>
+            <div class="grid two">
+              <label class="field"><span>贷款金额 元</span><input id="loanAmount" type="number" inputmode="decimal" min="0" step="10000" value="0"></label>
+              <label class="field"><span>年化利率 %</span><input id="interestRate" type="number" inputmode="decimal" min="0" step="0.01" value="0"></label>
+            </div>
+            <div class="grid two">
+              <label class="field"><span>刷卡/支付占比 %</span><input id="cardShare" type="number" inputmode="decimal" min="0" max="100" step="0.01" value="100"></label>
+              <label class="field"><span>刷卡/支付手续费率 ‰</span><input id="cardRate" type="number" inputmode="decimal" min="0" step="0.01" value="0.3"></label>
+            </div>
+            <p class="fee-tip">提示：刷卡/支付手续费率按千分比填写，默认 0.3‰；如实际通道费率不同，请按合同或对账单修改。</p>
+            <div class="grid">
+              <label class="field"><span>商业保险费用 元/年</span><input id="insuranceCost" type="number" inputmode="decimal" min="0" step="1000" value="0"></label>
+              <label class="field"><span>房产税 元/年</span><input id="propertyTax" type="number" inputmode="decimal" min="0" step="1000" value="0"></label>
+              <label class="field"><span>城镇土地使用税 元/年</span><input id="landUseTax" type="number" inputmode="decimal" min="0" step="1000" value="0"></label>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">税费参数</h2>
+            <span class="section-note">默认即可</span>
+          </div>
+          <div class="section-body grid two">
+            <label class="field">
+              <span>城建税所在地类型</span>
+              <select id="cityTaxRate">
+                <option value="0.07">市区 7%</option>
+                <option value="0.05">县城/镇 5%</option>
+                <option value="0.01">其他 1%</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>企业所得税口径</span>
+              <select id="incomeTaxMode">
+                <option value="general">一般企业 25%</option>
+                <option value="small">小型微利企业优惠测算（需符合条件）</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-body calc-action">
+            <button class="btn calc-start" type="button" id="startCalcBtn">开始计算</button>
+            <p class="calc-action-copy">点击后先检查漏填项和明显异常数据，确认无误后再生成测算结果和分享图片。</p>
+          </div>
+        </section>
+      </form>
+
+      <aside class="result-stack result-sticky">
+        <section class="hero-result" aria-live="polite">
+          <div class="profit-label">年度净利润</div>
+          <div class="profit-value" id="profitValue">待计算</div>
+          <div class="profit-sub" id="profitSub">填写完成后点击“开始计算”，系统会先检查漏填项和异常数据。</div>
+          <div class="kpi-grid">
+            <div class="kpi"><span>测算收入</span><strong id="kpiRevenue">0.00 万</strong></div>
+            <div class="kpi"><span>成本合计</span><strong id="kpiCost">0.00 万</strong></div>
+            <div class="kpi"><span>税费合计</span><strong id="kpiTax">0.00 万</strong></div>
+          </div>
+        </section>
+
+        <div class="alert" id="warningBox"></div>
+
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">收入明细</h2>
+          </div>
+          <div class="section-body detail-list" id="revenueList"></div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">成本明细</h2>
+          </div>
+          <div class="section-body detail-list" id="costList"></div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">税费明细</h2>
+          </div>
+          <div class="section-body detail-list" id="taxList"></div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">分享图预览</h2>
+          </div>
+          <div class="section-body">
+            <div class="share-card" id="shareCard">
+              <h3>加油站利润测算（合规经营）</h3>
+              <div class="share-row"><span>年度测算收入</span><strong id="shareRevenue">¥0.00 万</strong></div>
+              <div class="share-row"><span>年度成本合计</span><strong id="shareCost">¥0.00 万</strong></div>
+              <div class="share-row"><span>年度税费合计</span><strong id="shareTax">¥0.00 万</strong></div>
+              <div class="share-row"><span>年度净利润</span><strong id="shareProfit">¥0.00 万</strong></div>
+              <div class="share-row"><span>92# 日均销量</span><strong id="shareVol92">0 升/天</strong></div>
+              <div class="share-row"><span>95# 日均销量</span><strong id="shareVol95">0 升/天</strong></div>
+              <div class="share-row"><span>柴油日均销量</span><strong id="shareVolDiesel">0 升/天</strong></div>
+              <div class="qr-placeholder">
+                <img class="qr-image" src="assets/jyzmt-qrcode.jpg" alt="加油站漫谈公众号二维码">
+                <div>
+                  <div class="official-brand">
+                    <img class="official-avatar" src="assets/jyzmt-avatar.jpg" alt="加油站漫谈头像">
+                    <strong>加油站漫谈</strong>
+                  </div>
+                  <p><span id="shareTime">测算时间：-</span><br>欢迎关注公众号「加油站漫谈」，一起交流油站经营、利润测算和合规管理。</p>
+                </div>
+              </div>
+            </div>
+            <div class="grid two">
+              <button class="btn" type="button" id="copyShareBtn">分享结果图片</button>
+              <button class="btn secondary" type="button" id="saveBtn">保存图片到本机</button>
+            </div>
+            <p class="muted small">分享图展示概要和汽柴油销量，不展示城市、单项成本、税费明细和用户身份信息。</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">历史记录</h2>
+            <button class="btn neutral" type="button" id="clearHistoryBtn">清空记录</button>
+          </div>
+          <div class="section-body history-list" id="historyList"></div>
+        </section>
+      </aside>
+    </div>
+    </section>
+
+    <section class="page-view" id="reportPage">
+      <div class="report-hero">
+        <div>
+          <h2>加油站利润测算报告</h2>
+          <p>面向加油站投资人、经营者和站长使用，帮助快速看清油站年度利润、成本结构、税费压力和经营风险，便于复盘经营情况、评估投资收益和制定下一步调整方案。</p>
+        </div>
+        <div class="report-profit">
+          <span>报告口径年度净利润</span>
+          <strong id="reportProfit">¥0.00 万</strong>
+          <p id="reportStatus">当前为基础测算口径。</p>
+        </div>
+      </div>
+
+      <div class="report-grid">
+        <section class="report-card">
+          <h3>经营概览</h3>
+          <div class="report-metric"><span>年度测算收入</span><strong id="reportRevenue">0.00 万</strong></div>
+          <div class="report-metric"><span>年度成本合计</span><strong id="reportCost">0.00 万</strong></div>
+          <div class="report-metric"><span>年度税费合计</span><strong id="reportTax">0.00 万</strong></div>
+          <div class="report-metric"><span>年度油品销量</span><strong id="reportVolume">0.00 吨</strong></div>
+        </section>
+
+        <section class="report-card">
+          <h3>压力指标</h3>
+          <div class="report-metric">
+            <span>净利率</span>
+            <strong id="reportProfitRate">0.00%</strong>
+            <div class="meter"><i id="profitRateMeter"></i></div>
+          </div>
+          <div class="report-metric">
+            <span>成本占测算收入</span>
+            <strong id="reportCostRate">0.00%</strong>
+            <div class="meter"><i id="costRateMeter"></i></div>
+          </div>
+          <div class="report-metric">
+            <span>税费占测算收入</span>
+            <strong id="reportTaxRate">0.00%</strong>
+            <div class="meter"><i id="taxRateMeter"></i></div>
+          </div>
+        </section>
+
+        <section class="report-card">
+          <h3>报告提示</h3>
+          <div class="report-actions-list" id="reportActions"></div>
+        </section>
+      </div>
+
+      <div class="report-grid">
+        <section class="report-card">
+          <h3>油品结构</h3>
+          <div class="detail-list" id="reportFuelMix"></div>
+        </section>
+        <section class="report-card">
+          <h3>成本结构</h3>
+          <div class="detail-list" id="reportCostMix"></div>
+        </section>
+        <section class="report-card">
+          <h3>报告分享预览</h3>
+          <div class="share-card">
+            <h3>加油站利润测算报告</h3>
+            <div class="share-row"><span>年度测算收入</span><strong id="reportShareRevenue">¥0.00 万</strong></div>
+            <div class="share-row"><span>年度成本合计</span><strong id="reportShareCost">¥0.00 万</strong></div>
+            <div class="share-row"><span>年度税费合计</span><strong id="reportShareTax">¥0.00 万</strong></div>
+            <div class="share-row"><span>年度净利润</span><strong id="reportShareProfit">¥0.00 万</strong></div>
+            <div class="share-row"><span>92# / 95# / 柴油销量</span><strong id="reportShareVolumes">0 / 0 / 0 升/天</strong></div>
+            <div class="qr-placeholder">
+              <img class="qr-image" src="assets/jyzmt-qrcode.jpg" alt="加油站漫谈公众号二维码">
+              <div>
+                <div class="official-brand">
+                  <img class="official-avatar" src="assets/jyzmt-avatar.jpg" alt="加油站漫谈头像">
+                  <strong>加油站漫谈</strong>
+                </div>
+                <p><span id="reportShareTime">测算时间：-</span><br>欢迎关注公众号「加油站漫谈」，一起交流油站经营、利润测算和合规管理。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="section report-share-panel">
+        <div class="section-head">
+          <h2 class="section-title">报告分享页</h2>
+          <span class="section-note">完整报告图片</span>
+        </div>
+        <div class="section-body">
+          <div class="full-report-preview">
+            <h3>加油站利润测算报告</h3>
+            <p>适合发送给投资人、合伙人、站长或财务人员查看，帮助对方快速了解油站利润水平、成本构成、税费压力和后续经营关注点。</p>
+            <div class="share-row"><span>报告格式</span><strong>PNG 图片</strong></div>
+            <div class="share-row"><span>生成要求</span><strong>需填写加油站名称</strong></div>
+            <div class="share-row"><span>内容范围</span><strong>报告全文</strong></div>
+          </div>
+          <div class="grid two">
+            <button class="btn" type="button" id="reportShareBtn">分享完整报告图片</button>
+            <button class="btn secondary" type="button" id="reportSaveBtn">保存完整报告图片</button>
+          </div>
+          <p class="muted small">完整报告图片会包含报告页主要文字和测算数据，便于沟通、复盘和留档。</p>
+        </div>
+      </section>
+    </section>
+
+    <section class="page-view" id="formulaPage">
+      <div class="formula-layout">
+        <section class="section">
+          <div class="section-head">
+            <h2 class="section-title">完整计算公式</h2>
+            <span class="section-note">完整展开，便于核对</span>
+          </div>
+          <div class="section-body">
+            <div class="formula-block">
+              <div class="formula-title">1. 销量与吨数换算</div>
+              <div class="formula-content">
+                <code>年度销量（升）= 日均销量（升/天）× 365</code>
+                <code>年度销量（吨）= 年度销量（升）× 密度 ÷ 1000</code>
+                汽油 92#、95# 默认密度为 0.73 kg/L，柴油默认密度为 0.84 kg/L。
+              </div>
+            </div>
+
+            <div class="formula-block">
+              <div class="formula-title">2. 毛利、采购价与零售价</div>
+              <div class="formula-content">
+                <code>默认含税零售价 = 参考含税采购价 + 吨油毛利</code>
+                <code>升毛利换算吨毛利 = 元/升 ÷ 密度 × 1000</code>
+                如果开启“自定义采购价/零售价”，系统优先使用用户填写的价格，不再使用参考进价。
+              </div>
+            </div>
+
+            <div class="formula-block">
+              <div class="formula-title">3. 价税分离与测算收入</div>
+              <div class="formula-content">
+                <code>不含税采购价 = 含税采购价 ÷ (1 + 13%)</code>
+                <code>不含税零售价 = 含税零售价 ÷ (1 + 13%)</code>
+                <code>油品不含税销售收入 = 年度销量（吨）× 不含税零售价</code>
+                <code>利润测算收入合计 = 油品不含税销售收入</code>
+                非油业务不纳入本工具测算。建议非油业务单独注册营业执照并单独核算，税务处理上不要和加油站主体捆绑在一起。
+              </div>
+            </div>
+
+            <div class="formula-block">
+              <div class="formula-title">4. 成本合计</div>
+              <div class="formula-content">
+                <code>进油成本 = 年度销量（吨）× 不含税采购价</code>
+                <code>人员工资 = 月工资总额 × 12</code>
+                <code>企业社保 = 人员工资 × 32%（勾选时）</code>
+                <code>证照及行政合规支出 = 用户填写的年度合规行政支出</code>
+                <code>贷款利息 = 贷款金额 × 年化利率</code>
+                <code>刷卡/支付手续费 = 油品含税销售额 × 支付占比 × 手续费率‰ ÷ 1000</code>
+                <code>财务成本 = 贷款利息 + 刷卡/支付手续费</code>
+                土地/油站租金、资产折旧（设备、基础设施工程摊销等）、保险、房产税、城镇土地使用税等按年度金额直接计入成本。
+              </div>
+            </div>
+
+            <div class="formula-block">
+              <div class="formula-title">5. 税费与净利润</div>
+              <div class="formula-content">
+                <code>销项税额 = 油品不含税销售收入 × 13%</code>
+                <code>进项税额 = 进油成本 × 13%</code>
+                <code>增值税应纳税额 = max(销项税额 - 进项税额, 0)</code>
+                <code>城建税 = 增值税 × 所在地税率（7% / 5% / 1%）</code>
+                <code>印花税 = 油品不含税销售收入 × 0.03%</code>
+                <code>企业所得税 = max(应纳税所得额, 0) × 所得税测算率</code>
+                <code>年度净利润 = 利润测算收入合计 - 成本合计 - 税费合计</code>
+                小型微利企业优惠仅为可选测算口径，是否适用以企业实际条件和主管税务机关口径为准。
+              </div>
+            </div>
+
+            <p class="muted small">免责声明：本工具测算结果基于用户自行填写的数据和系统内置估算公式，仅用于经营参考，不构成税务、财务、法律或投资建议，不作为纳税申报依据。</p>
+          </div>
+        </section>
+
+        <aside class="section">
+          <div class="section-head">
+            <h2 class="section-title">给作者留言</h2>
+            <span class="section-note">后台可回复</span>
+          </div>
+          <div class="section-body">
+            <form class="message-form" id="messageForm">
+              <label class="field"><span>称呼</span><input id="messageName" type="text" placeholder="例如：王站长"></label>
+              <label class="field"><span>联系方式（选填）</span><input id="messageContact" type="text" placeholder="微信号或手机号，方便作者回复"></label>
+              <label class="field"><span>留言内容</span><textarea id="messageContent" placeholder="可以写公式建议、功能需求、行业口径问题，作者后台看到后可回复。"></textarea></label>
+              <button class="btn" type="submit">提交留言</button>
+              <p class="muted small">H5 预览版会先保存在本机；正式小程序版会写入后台，作者可在后台查看并回复。</p>
+            </form>
+            <div class="message-list" id="messageList"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <div class="mobile-actions">
+      <button class="btn secondary" type="button" id="mobileSampleBtn">填入示例</button>
+      <button class="btn" type="button" id="scrollResultBtn">开始计算</button>
+    </div>
+
+    <div class="modal-backdrop" id="reviewModal" aria-hidden="true">
+      <div class="modal-card wide" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
+        <h3 id="reviewModalTitle">核算前确认</h3>
+        <p id="reviewModalIntro">系统会先帮你看一眼漏填项和明显异常数据。</p>
+        <div class="review-summary" id="reviewSummary"></div>
+        <div class="review-list" id="reviewList"></div>
+        <div class="modal-actions">
+          <button class="btn neutral" type="button" id="reviewCancelBtn">返回修改</button>
+          <button class="btn" type="button" id="reviewConfirmBtn">确认无误，生成结果</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop" id="stationModal" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="stationModalTitle">
+        <h3 id="stationModalTitle">填写油站名称</h3>
+        <p>生成分享图片前，请填写油站名称。名称只用于本次分享图片展示，不影响计算结果。</p>
+        <label class="field">
+          <span>油站名称</span>
+          <input id="stationNameInput" type="text" placeholder="例如：某某加油站">
+        </label>
+        <div class="modal-actions">
+          <button class="btn neutral" type="button" id="stationCancelBtn">取消</button>
+          <button class="btn" type="button" id="stationConfirmBtn">继续生成</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const DENSITY = { gas: 0.73, diesel: 0.84 };
+    const VAT = 0.13;
+    const DAYS = 365;
+    const DEFAULT = {
+      marginLiter: { m92: 1, m95: 1.3, diesel: 0.3 },
+      purchaseGross: { p92: 7500, p95: 8000, diesel: 6500 },
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const numberIds = [
+      "vol92", "vol95", "volDiesel", "margin92", "margin95", "marginDiesel",
+      "purchase92", "sale92", "purchase95", "sale95", "purchaseDiesel", "saleDiesel",
+      "employeeCount", "avgSalary", "salaryTotal", "opsCost", "giftCost",
+      "licenseCost", "adminCost", "landRent", "depreciation", "loanAmount", "interestRate",
+      "cardShare", "cardRate", "insuranceCost", "propertyTax", "landUseTax",
+    ];
+
+    let marginUnit = "ton";
+    let wageMode = "people";
+    let lastResult = null;
+    let pendingReviewedResult = null;
+    let pendingImageAction = null;
+
+    function n(id) {
+      const value = parseFloat($(id).value);
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    function yuanToWan(value) {
+      return value / 10000;
+    }
+
+    function moneyWan(value) {
+      const sign = value < 0 ? "-" : "";
+      return `${sign}¥${Math.abs(yuanToWan(value)).toFixed(2)} 万`;
+    }
+
+    function plainWan(value) {
+      const sign = value < 0 ? "-" : "";
+      return `${sign}${Math.abs(yuanToWan(value)).toFixed(2)} 万`;
+    }
+
+    function pct(value) {
+      return value / 100;
+    }
+
+    function literToTonMargin(value, density) {
+      return value / density * 1000;
+    }
+
+    function tonToLiterMargin(value, density) {
+      return value * density / 1000;
+    }
+
+    function getMarginsTon() {
+      if (!$("customMargin").checked) {
+        return {
+          m92: literToTonMargin(DEFAULT.marginLiter.m92, DENSITY.gas),
+          m95: literToTonMargin(DEFAULT.marginLiter.m95, DENSITY.gas),
+          diesel: literToTonMargin(DEFAULT.marginLiter.diesel, DENSITY.diesel),
+        };
+      }
+      if (marginUnit === "liter") {
+        return {
+          m92: literToTonMargin(n("margin92"), DENSITY.gas),
+          m95: literToTonMargin(n("margin95"), DENSITY.gas),
+          diesel: literToTonMargin(n("marginDiesel"), DENSITY.diesel),
+        };
+      }
+      return { m92: n("margin92"), m95: n("margin95"), diesel: n("marginDiesel") };
+    }
+
+    function getPrices(margins) {
+      const custom = $("customPrice").checked;
+      const mode = $("taxMode").value;
+      const gross = custom ? mode === "gross" : true;
+      const raw = custom
+        ? {
+            p92: n("purchase92"), s92: n("sale92"),
+            p95: n("purchase95"), s95: n("sale95"),
+            pd: n("purchaseDiesel"), sd: n("saleDiesel"),
+          }
+        : {
+            p92: DEFAULT.purchaseGross.p92,
+            s92: DEFAULT.purchaseGross.p92 + margins.m92,
+            p95: DEFAULT.purchaseGross.p95,
+            s95: DEFAULT.purchaseGross.p95 + margins.m95,
+            pd: DEFAULT.purchaseGross.diesel,
+            sd: DEFAULT.purchaseGross.diesel + margins.diesel,
+          };
+
+      const divisor = gross ? 1 + VAT : 1;
+      return {
+        gross,
+        raw,
+        net: {
+          p92: raw.p92 / divisor, s92: raw.s92 / divisor,
+          p95: raw.p95 / divisor, s95: raw.s95 / divisor,
+          pd: raw.pd / divisor, sd: raw.sd / divisor,
+        },
+      };
+    }
+
+    function incomeTax(taxable) {
+      if (taxable <= 0) return 0;
+      if ($("incomeTaxMode").value === "small") {
+        return taxable * 0.05;
+      }
+      return taxable * 0.25;
+    }
+
+    function calculate() {
+      const liters = {
+        l92: n("vol92") * DAYS,
+        l95: n("vol95") * DAYS,
+        ld: n("volDiesel") * DAYS,
+      };
+      const tons = {
+        t92: liters.l92 * DENSITY.gas / 1000,
+        t95: liters.l95 * DENSITY.gas / 1000,
+        td: liters.ld * DENSITY.diesel / 1000,
+      };
+      const margins = getMarginsTon();
+      const prices = getPrices(margins);
+
+      const grossSales = {
+        r92: tons.t92 * prices.raw.s92,
+        r95: tons.t95 * prices.raw.s95,
+        rd: tons.td * prices.raw.sd,
+      };
+      const grossFuelSales = grossSales.r92 + grossSales.r95 + grossSales.rd;
+
+      const revenue = {
+        r92: tons.t92 * prices.net.s92,
+        r95: tons.t95 * prices.net.s95,
+        rd: tons.td * prices.net.sd,
+      };
+      revenue.fuel = revenue.r92 + revenue.r95 + revenue.rd;
+      revenue.total = revenue.fuel;
+
+      const purchaseCost = tons.t92 * prices.net.p92 + tons.t95 * prices.net.p95 + tons.td * prices.net.pd;
+      const monthlyWage = wageMode === "people" ? n("employeeCount") * n("avgSalary") : n("salaryTotal");
+      const wage = monthlyWage * 12;
+      const social = $("hasSocial").checked ? wage * 0.32 : 0;
+      const ops = n("opsCost") * 12;
+      const gift = n("giftCost") * 12;
+      const license = $("hasLicense").checked ? n("licenseCost") : 0;
+      const admin = n("adminCost");
+      const landRent = n("landRent");
+      const depreciation = n("depreciation");
+      const loanInterest = n("loanAmount") * pct(n("interestRate"));
+      const cardFee = grossFuelSales * pct(Math.min(n("cardShare"), 100)) * (n("cardRate") / 1000);
+      const complianceAdmin = license + admin;
+      const financeCost = loanInterest + cardFee;
+      const insurance = n("insuranceCost");
+      const propertyTax = n("propertyTax");
+      const landUseTax = n("landUseTax");
+      const costTotal = purchaseCost + wage + social + ops + gift + license + admin +
+        landRent + depreciation + loanInterest + cardFee + insurance + propertyTax + landUseTax;
+
+      const outputVat = revenue.fuel * VAT;
+      const inputVat = purchaseCost * VAT;
+      const vatPayable = Math.max(0, outputVat - inputVat);
+      const retainedVat = Math.max(0, inputVat - outputVat);
+      const cityTax = vatPayable * parseFloat($("cityTaxRate").value);
+      const edu = vatPayable * 0.03;
+      const localEdu = vatPayable * 0.02;
+      const stamp = revenue.fuel * 0.0003;
+      const taxableIncome = revenue.total - costTotal - cityTax - edu - localEdu - stamp;
+      const corpTax = incomeTax(taxableIncome);
+      const taxTotal = vatPayable + cityTax + edu + localEdu + stamp + corpTax;
+      const profit = revenue.total - costTotal - taxTotal;
+
+      const warnings = [];
+      if ((n("vol92") + n("vol95") + n("volDiesel")) <= 0) warnings.push("至少填写一个油品销量后，结果才有经营意义。");
+      if (prices.raw.s92 < prices.raw.p92 && tons.t92 > 0) warnings.push("92# 当前为负毛利。");
+      if (prices.raw.s95 < prices.raw.p95 && tons.t95 > 0) warnings.push("95# 当前为负毛利。");
+      if (prices.raw.sd < prices.raw.pd && tons.td > 0) warnings.push("柴油当前为负毛利。");
+      if (retainedVat > 0) warnings.push(`进项留抵估算：${moneyWan(retainedVat)}。`);
+      if (taxableIncome <= 0) warnings.push("应纳税所得额小于等于 0，企业所得税按 0 测算。");
+      if ($("incomeTaxMode").value === "small") warnings.push("当前使用小型微利企业优惠测算口径。");
+
+      return {
+        time: new Date(),
+        tons, margins, prices, grossFuelSales, revenue,
+        costs: { purchaseCost, wage, social, ops, gift, license, admin, complianceAdmin, landRent, depreciation, loanInterest, cardFee, financeCost, insurance, propertyTax, landUseTax, total: costTotal },
+        taxes: { outputVat, inputVat, vatPayable, retainedVat, cityTax, edu, localEdu, stamp, taxableIncome, corpTax, total: taxTotal },
+        profit,
+        warnings,
+      };
+    }
+
+    function oilRows(result) {
+      return [
+        { name: "92#", daily: n("vol92"), tons: result.tons.t92, density: DENSITY.gas, rawPurchase: result.prices.raw.p92, rawSale: result.prices.raw.s92, netPurchase: result.prices.net.p92, netSale: result.prices.net.s92 },
+        { name: "95#", daily: n("vol95"), tons: result.tons.t95, density: DENSITY.gas, rawPurchase: result.prices.raw.p95, rawSale: result.prices.raw.s95, netPurchase: result.prices.net.p95, netSale: result.prices.net.s95 },
+        { name: "柴油", daily: n("volDiesel"), tons: result.tons.td, density: DENSITY.diesel, rawPurchase: result.prices.raw.pd, rawSale: result.prices.raw.sd, netPurchase: result.prices.net.pd, netSale: result.prices.net.sd },
+      ];
+    }
+
+    function getReviewIssues(result) {
+      const blockers = [];
+      const warnings = [];
+      const totalDaily = n("vol92") + n("vol95") + n("volDiesel");
+      const rows = oilRows(result);
+
+      if (totalDaily <= 0) blockers.push("销量数据未填写：至少需要填写一个油品的日均销量。");
+      if (n("cardShare") > 100) blockers.push("刷卡/支付占比不能超过 100%，请修改后再计算。");
+      if (n("cardShare") < 0 || n("cardRate") < 0) blockers.push("刷卡/支付占比和手续费率不能填写为负数。");
+
+      if ($("customPrice").checked) {
+        rows.forEach((item) => {
+          if (item.daily > 0 && (item.rawPurchase <= 0 || item.rawSale <= 0)) {
+            blockers.push(`${item.name} 已填写销量，但自定义采购价或零售价为空，请补充。`);
+          }
+        });
+      }
+
+      const monthlyWage = wageMode === "people" ? n("employeeCount") * n("avgSalary") : n("salaryTotal");
+      if (totalDaily > 0 && monthlyWage <= 0) warnings.push("人员工资为 0，请确认是否漏填人员成本。");
+      if (totalDaily > 0 && n("opsCost") <= 0) warnings.push("月综合运营费用为 0，请确认水电、维修、办公、杂费等是否需要计入。");
+      if (n("loanAmount") > 0 && n("interestRate") <= 0) warnings.push("已填写贷款金额，但利率为 0，请确认贷款利息是否漏填。");
+      if (n("loanAmount") <= 0 && n("interestRate") > 0) warnings.push("已填写利率，但贷款金额为 0，请确认资金成本是否需要计入。");
+
+      rows.forEach((item) => {
+        if (item.daily <= 0) return;
+        const marginTon = item.rawSale - item.rawPurchase;
+        const marginLiter = marginTon * item.density / 1000;
+        const marginRate = item.netSale > 0 ? (item.netSale - item.netPurchase) / item.netSale * 100 : 0;
+        if (marginLiter > 3) warnings.push(`${item.name} 油品毛利约 ${marginLiter.toFixed(2)} 元/升，超过 3 元/升，请核对采购价、零售价或毛利口径。`);
+        if (marginRate > 30) warnings.push(`${item.name} 油品毛利率约 ${marginRate.toFixed(1)}%，超过 30%，请确认数据是否合理。`);
+        if (marginTon < 0) warnings.push(`${item.name} 当前为负毛利，请确认是否为真实促销或价格录入错误。`);
+      });
+
+      const totalTons = rows.reduce((sum, item) => sum + item.tons, 0);
+      if (totalTons > 0) {
+        const managementCost = Math.max(0, result.costs.total - result.costs.purchaseCost);
+        const managementPerTon = managementCost / totalTons;
+        if (managementPerTon < 100) warnings.push(`管理类成本约 ${managementPerTon.toFixed(0)} 元/吨，低于 100 元/吨，请确认人工、运营、租金、折旧、保险等费用是否漏填。`);
+        if (managementPerTon > 1000) warnings.push(`管理类成本约 ${managementPerTon.toFixed(0)} 元/吨，超过 1000 元/吨，请核对固定成本、资金成本或销量是否录入偏差。`);
+      }
+
+      return { blockers, warnings };
+    }
+
+    function line(label, value, total = false) {
+      if (!total && Math.abs(value) < 0.005) return "";
+      return `<div class="line-item${total ? " total" : ""}"><span>${label}</span><strong>${moneyWan(value)}</strong></div>`;
+    }
+
+    function percent(value) {
+      if (!Number.isFinite(value)) return "0.00%";
+      return `${value.toFixed(2)}%`;
+    }
+
+    function setMeter(id, value) {
+      const node = $(id);
+      if (!node) return;
+      node.style.width = `${Math.max(0, Math.min(value, 100)).toFixed(2)}%`;
+    }
+
+    function reportAction(index, title, body) {
+      return `<div class="action-item"><b>${index}</b><div><strong>${title}</strong><span>${body}</span></div></div>`;
+    }
+
+    function getReportContext(result) {
+      const totalTons = result.tons.t92 + result.tons.t95 + result.tons.td;
+      const revenueBase = Math.max(result.revenue.total, 1);
+      const profitRate = result.profit / revenueBase * 100;
+      const costRate = result.costs.total / revenueBase * 100;
+      const taxRate = result.taxes.total / revenueBase * 100;
+      const fuelGrossMargin = result.revenue.fuel - result.costs.purchaseCost;
+      const fuelMarginRate = fuelGrossMargin / Math.max(result.revenue.fuel, 1) * 100;
+      const actions = [];
+
+      if (profitRate < 5) {
+        actions.push(["优先看毛利和费用", "净利率偏低时，先核对实际采购价、零售价、折扣活动和大额固定成本。"]);
+      } else {
+        actions.push(["利润状态较稳", "当前测算净利率尚可，建议保留精算价格口径，便于后续月度复盘。"]);
+      }
+      if (costRate > 88) {
+        actions.push(["压降成本压力", "成本占比较高，重点看租金、人工、资金利息和支付手续费。"]);
+      } else {
+        actions.push(["成本结构可控", "成本占比未明显异常，可继续细化固定成本和支付通道成本。"]);
+      }
+      if (result.taxes.retainedVat > 0) {
+        actions.push(["关注进项留抵", "当前出现进项留抵估算，可结合实际申报周期单独核对。"]);
+      } else {
+        actions.push(["税费口径清晰", "当前税费为正向测算，可继续核对城建税所在地和所得税优惠条件。"]);
+      }
+
+      return { totalTons, profitRate, costRate, taxRate, fuelGrossMargin, fuelMarginRate, actions };
+    }
+
+    function renderReport(result) {
+      const context = getReportContext(result);
+      const taxModeLabel = $("incomeTaxMode").value === "small" ? "小型微利企业优惠测算" : "一般企业 25% 测算";
+
+      $("reportProfit").textContent = moneyWan(result.profit);
+      $("reportStatus").textContent = `当前口径：${taxModeLabel}；结果仅作经营测算。`;
+      $("reportRevenue").textContent = plainWan(result.revenue.total);
+      $("reportCost").textContent = plainWan(result.costs.total);
+      $("reportTax").textContent = plainWan(result.taxes.total);
+      $("reportVolume").textContent = `${context.totalTons.toFixed(2)} 吨`;
+      $("reportProfitRate").textContent = percent(context.profitRate);
+      $("reportCostRate").textContent = percent(context.costRate);
+      $("reportTaxRate").textContent = percent(context.taxRate);
+      setMeter("profitRateMeter", context.profitRate * 4);
+      setMeter("costRateMeter", context.costRate);
+      setMeter("taxRateMeter", context.taxRate * 3);
+
+      $("reportFuelMix").innerHTML = [
+        line("92# 年销量", result.tons.t92 * 10000),
+        line("95# 年销量", result.tons.t95 * 10000),
+        line("柴油年销量", result.tons.td * 10000),
+        `<div class="line-item total"><span>油品毛利率</span><strong>${percent(context.fuelMarginRate)}</strong></div>`,
+      ].join("").replaceAll("¥", "").replaceAll(" 万", " 吨");
+
+      $("reportCostMix").innerHTML = [
+        line("进油成本", result.costs.purchaseCost),
+        line("人工及社保", result.costs.wage + result.costs.social),
+        line("运营及赠品", result.costs.ops + result.costs.gift),
+        line("证照及行政合规支出", result.costs.complianceAdmin),
+        line("租金及资产折旧", result.costs.landRent + result.costs.depreciation),
+        line("财务成本", result.costs.financeCost),
+        line("保险及税费类成本", result.costs.insurance + result.costs.propertyTax + result.costs.landUseTax),
+        line("成本合计", result.costs.total, true),
+      ].join("");
+
+      $("reportActions").innerHTML = context.actions.map((item, idx) => reportAction(idx + 1, item[0], item[1])).join("");
+
+      $("reportShareRevenue").textContent = moneyWan(result.revenue.total);
+      $("reportShareCost").textContent = moneyWan(result.costs.total);
+      $("reportShareTax").textContent = moneyWan(result.taxes.total);
+      $("reportShareProfit").textContent = moneyWan(result.profit);
+      $("reportShareVolumes").textContent = `${n("vol92").toLocaleString("zh-CN")} / ${n("vol95").toLocaleString("zh-CN")} / ${n("volDiesel").toLocaleString("zh-CN")} 升/天`;
+      $("reportShareTime").textContent = `测算时间：${result.time.toLocaleDateString("zh-CN")}`;
+    }
+
+    function renderEmptyResult(message = "填写完成后点击“开始计算”，系统会先检查漏填项和异常数据。") {
+      $("profitValue").textContent = "待计算";
+      $("profitValue").classList.remove("loss");
+      $("profitSub").textContent = message;
+      $("kpiRevenue").textContent = "0.00 万";
+      $("kpiCost").textContent = "0.00 万";
+      $("kpiTax").textContent = "0.00 万";
+      $("shareRevenue").textContent = "¥0.00 万";
+      $("shareCost").textContent = "¥0.00 万";
+      $("shareTax").textContent = "¥0.00 万";
+      $("shareProfit").textContent = "¥0.00 万";
+      $("shareVol92").textContent = "0 升/天";
+      $("shareVol95").textContent = "0 升/天";
+      $("shareVolDiesel").textContent = "0 升/天";
+      $("shareTime").textContent = "测算时间：-";
+      $("revenueList").innerHTML = `<p class="muted small">点击“开始计算”后展示收入明细。</p>`;
+      $("costList").innerHTML = `<p class="muted small">点击“开始计算”后展示成本明细。</p>`;
+      $("taxList").innerHTML = `<p class="muted small">点击“开始计算”后展示税费明细。</p>`;
+      const warningBox = $("warningBox");
+      warningBox.textContent = message;
+      warningBox.classList.toggle("active", Boolean(message));
+
+      $("reportProfit").textContent = "待计算";
+      $("reportStatus").textContent = "请先在利润计算器页点击“开始计算”。";
+      $("reportRevenue").textContent = "0.00 万";
+      $("reportCost").textContent = "0.00 万";
+      $("reportTax").textContent = "0.00 万";
+      $("reportVolume").textContent = "0.00 吨";
+      $("reportProfitRate").textContent = "0.00%";
+      $("reportCostRate").textContent = "0.00%";
+      $("reportTaxRate").textContent = "0.00%";
+      setMeter("profitRateMeter", 0);
+      setMeter("costRateMeter", 0);
+      setMeter("taxRateMeter", 0);
+      $("reportFuelMix").innerHTML = `<p class="muted small">生成结果后展示油品结构。</p>`;
+      $("reportCostMix").innerHTML = `<p class="muted small">生成结果后展示成本结构。</p>`;
+      $("reportActions").innerHTML = `<p class="muted small">生成结果后展示报告提示。</p>`;
+      $("reportShareRevenue").textContent = "¥0.00 万";
+      $("reportShareCost").textContent = "¥0.00 万";
+      $("reportShareTax").textContent = "¥0.00 万";
+      $("reportShareProfit").textContent = "¥0.00 万";
+      $("reportShareVolumes").textContent = "0 / 0 / 0 升/天";
+      $("reportShareTime").textContent = "测算时间：-";
+      $("scrollResultBtn").textContent = "开始计算";
+    }
+
+    function render(result) {
+      if (!result) {
+        renderEmptyResult();
+        return;
+      }
+      lastResult = result;
+      $("profitValue").textContent = moneyWan(result.profit);
+      $("scrollResultBtn").textContent = "看结果";
+      $("profitValue").classList.toggle("loss", result.profit < 0);
+      $("profitSub").textContent = `测算时间：${result.time.toLocaleString("zh-CN", { hour12: false })}`;
+      $("kpiRevenue").textContent = plainWan(result.revenue.total);
+      $("kpiCost").textContent = plainWan(result.costs.total);
+      $("kpiTax").textContent = plainWan(result.taxes.total);
+      $("shareRevenue").textContent = moneyWan(result.revenue.total);
+      $("shareCost").textContent = moneyWan(result.costs.total);
+      $("shareTax").textContent = moneyWan(result.taxes.total);
+      $("shareProfit").textContent = moneyWan(result.profit);
+      $("shareVol92").textContent = `${n("vol92").toLocaleString("zh-CN")} 升/天`;
+      $("shareVol95").textContent = `${n("vol95").toLocaleString("zh-CN")} 升/天`;
+      $("shareVolDiesel").textContent = `${n("volDiesel").toLocaleString("zh-CN")} 升/天`;
+      $("shareTime").textContent = `测算时间：${result.time.toLocaleDateString("zh-CN")}`;
+
+      $("revenueList").innerHTML = [
+        line("92# 不含税销售收入", result.revenue.r92),
+        line("95# 不含税销售收入", result.revenue.r95),
+        line("柴油不含税销售收入", result.revenue.rd),
+        line("测算收入合计", result.revenue.total, true),
+      ].join("");
+
+      $("costList").innerHTML = [
+        line("进油成本（不含税）", result.costs.purchaseCost),
+        line("人员工资", result.costs.wage),
+        line("企业社保", result.costs.social),
+        line("综合运营费用", result.costs.ops),
+        line("赠品成本", result.costs.gift),
+        line("证照及行政合规支出", result.costs.complianceAdmin),
+        line("土地/油站租金", result.costs.landRent),
+        line("资产折旧（设备、基础设施工程摊销等）", result.costs.depreciation),
+        line("财务成本（贷款利息、刷卡手续费）", result.costs.financeCost),
+        line("商业保险费用", result.costs.insurance),
+        line("房产税", result.costs.propertyTax),
+        line("城镇土地使用税", result.costs.landUseTax),
+        line("成本合计", result.costs.total, true),
+      ].join("");
+
+      $("taxList").innerHTML = [
+        line("销项税额", result.taxes.outputVat),
+        line("进项税额", result.taxes.inputVat),
+        line("增值税应纳税额", result.taxes.vatPayable),
+        line("城建税", result.taxes.cityTax),
+        line("教育费附加", result.taxes.edu),
+        line("地方教育附加", result.taxes.localEdu),
+        line("印花税", result.taxes.stamp),
+        line("企业所得税", result.taxes.corpTax),
+        line("税费合计", result.taxes.total, true),
+      ].join("");
+
+      const warningBox = $("warningBox");
+      warningBox.innerHTML = result.warnings.join("<br>");
+      warningBox.classList.toggle("active", result.warnings.length > 0);
+      renderReport(result);
+    }
+
+    function renderReviewModal(review, result) {
+      const hasBlockers = review.blockers.length > 0;
+      const warnings = review.warnings;
+      const totalIssues = review.blockers.length + warnings.length;
+      $("reviewModalTitle").textContent = hasBlockers ? "请先补充信息" : "核算前确认";
+      $("reviewModalIntro").textContent = hasBlockers
+        ? "下面这些内容会影响计算结果，请返回修改后再生成。"
+        : "请确认下面的检查结果。确认无误后，系统再生成正式测算结果。";
+
+      if (totalIssues === 0) {
+        $("reviewSummary").style.display = "none";
+        $("reviewSummary").innerHTML = "";
+        $("reviewList").innerHTML = `<div class="review-item">没有发现漏填项或明显异常数据，可以生成结果。</div>`;
+      } else {
+        $("reviewSummary").style.display = "block";
+        $("reviewSummary").innerHTML = [
+          `年度测算收入：<strong>${moneyWan(result.revenue.total)}</strong>`,
+          `年度成本合计：<strong>${moneyWan(result.costs.total)}</strong>`,
+          `年度净利润：<strong>${moneyWan(result.profit)}</strong>`,
+        ].join("<br>");
+        $("reviewList").innerHTML = [
+          ...review.blockers.map((item) => `<div class="review-item blocking">${item}</div>`),
+          ...warnings.map((item) => `<div class="review-item">${item}</div>`),
+        ].join("");
+      }
+      $("reviewConfirmBtn").disabled = hasBlockers;
+      $("reviewConfirmBtn").textContent = hasBlockers ? "请先返回修改" : "确认无误，生成结果";
+    }
+
+    function openReviewModal(result, review) {
+      pendingReviewedResult = result;
+      renderReviewModal(review, result);
+      $("reviewModal").classList.add("active");
+      $("reviewModal").setAttribute("aria-hidden", "false");
+    }
+
+    function closeReviewModal() {
+      pendingReviewedResult = null;
+      pendingImageAction = null;
+      $("reviewModal").classList.remove("active");
+      $("reviewModal").setAttribute("aria-hidden", "true");
+    }
+
+    function startCalculation() {
+      const result = calculate();
+      const review = getReviewIssues(result);
+      openReviewModal(result, review);
+    }
+
+    function confirmReviewedResult() {
+      if (!pendingReviewedResult) return;
+      const result = pendingReviewedResult;
+      pendingReviewedResult = null;
+      $("reviewModal").classList.remove("active");
+      $("reviewModal").setAttribute("aria-hidden", "true");
+      render(result);
+      if (pendingImageAction) {
+        const action = pendingImageAction;
+        pendingImageAction = null;
+        openStationModal(action);
+        return;
+      }
+      setTimeout(() => document.querySelector(".hero-result").scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+    }
+
+    function markInputsDirty() {
+      if (!lastResult) return;
+      lastResult = null;
+      renderEmptyResult("数据已修改，请重新点击“开始计算”并确认后生成新结果。");
+    }
+
+    function setSample() {
+      const sample = {
+        vol92: 5000, vol95: 2000, volDiesel: 3000,
+        employeeCount: 5, avgSalary: 6000,
+        opsCost: 8000, giftCost: 2000,
+        licenseCost: 8000, adminCost: 0,
+        landRent: 120000, depreciation: 80000,
+        loanAmount: 1000000, interestRate: 5,
+        cardShare: 100, cardRate: 0.3,
+        insuranceCost: 20000, propertyTax: 0, landUseTax: 10000,
+      };
+      Object.entries(sample).forEach(([id, value]) => { $(id).value = value; });
+      $("hasSocial").checked = true;
+      $("hasLicense").checked = true;
+      lastResult = null;
+      renderEmptyResult("示例数据已填入，点击“开始计算”查看测算结果。");
+    }
+
+    function resetAll() {
+      numberIds.forEach((id) => { $(id).value = 0; });
+      $("licenseCost").value = 5000;
+      $("margin92").value = marginUnit === "ton" ? 1370 : 1;
+      $("margin95").value = marginUnit === "ton" ? 1781 : 1.3;
+      $("marginDiesel").value = marginUnit === "ton" ? 357 : 0.3;
+      $("purchase92").value = 7500;
+      $("sale92").value = 8870;
+      $("purchase95").value = 8000;
+      $("sale95").value = 9781;
+      $("purchaseDiesel").value = 6500;
+      $("saleDiesel").value = 6857;
+      $("cardShare").value = 100;
+      $("cardRate").value = 0.3;
+      $("hasSocial").checked = true;
+      $("hasLicense").checked = true;
+      $("customMargin").checked = false;
+      $("customPrice").checked = false;
+      syncPanels();
+      lastResult = null;
+      renderEmptyResult("已清空输入，请填写数据后点击“开始计算”。");
+    }
+
+    function syncPanels() {
+      $("marginPanel").classList.toggle("active", $("customMargin").checked);
+      $("pricePanel").classList.toggle("active", $("customPrice").checked);
+      $("peopleWagePanel").style.display = wageMode === "people" ? "grid" : "none";
+      $("totalWagePanel").classList.toggle("active", wageMode === "total");
+    }
+
+    function updateMarginUnit(unit) {
+      if (unit === marginUnit) return;
+      const oldUnit = marginUnit;
+      marginUnit = unit;
+      const fields = [
+        ["margin92", DENSITY.gas, "m92Label", "92# 毛利"],
+        ["margin95", DENSITY.gas, "m95Label", "95# 毛利"],
+        ["marginDiesel", DENSITY.diesel, "mDieselLabel", "柴油毛利"],
+      ];
+      fields.forEach(([id, density, labelId, label]) => {
+        const value = n(id);
+        $(id).value = oldUnit === "ton" ? tonToLiterMargin(value, density).toFixed(2) : literToTonMargin(value, density).toFixed(0);
+        $(labelId).textContent = `${label} ${marginUnit === "ton" ? "元/吨" : "元/升"}`;
+      });
+      document.querySelectorAll("[data-margin-unit]").forEach((btn) => btn.classList.toggle("active", btn.dataset.marginUnit === marginUnit));
+      markInputsDirty();
+    }
+
+    function setWageMode(mode) {
+      wageMode = mode;
+      document.querySelectorAll("[data-wage-mode]").forEach((btn) => btn.classList.toggle("active", btn.dataset.wageMode === wageMode));
+      syncPanels();
+      markInputsDirty();
+    }
+
+    function saveHistory() {
+      const result = lastResult;
+      if (!result) return;
+      const history = JSON.parse(localStorage.getItem("gasStationCalcHistory") || "[]");
+      history.unshift({
+        time: result.time.toISOString(),
+        profit: result.profit,
+        revenue: result.revenue.total,
+        cost: result.costs.total,
+        tax: result.taxes.total,
+        volumes: { v92: n("vol92"), v95: n("vol95"), diesel: n("volDiesel") },
+      });
+      localStorage.setItem("gasStationCalcHistory", JSON.stringify(history.slice(0, 20)));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = JSON.parse(localStorage.getItem("gasStationCalcHistory") || "[]");
+      if (!history.length) {
+        $("historyList").innerHTML = `<p class="muted small">暂无测算记录</p>`;
+        return;
+      }
+      $("historyList").innerHTML = history.map((item) => `
+        <div class="history-item">
+          <div><strong>${moneyWan(item.profit)}</strong><span>${new Date(item.time).toLocaleString("zh-CN", { hour12: false })}</span></div>
+          <div><strong>${plainWan(item.revenue)}</strong><span>测算收入</span></div>
+        </div>
+      `).join("");
+    }
+
+    function renderMessages() {
+      const messages = JSON.parse(localStorage.getItem("gasStationCalcMessages") || "[]");
+      if (!messages.length) {
+        $("messageList").innerHTML = `<p class="muted small">暂无留言。正式小程序上线后，留言会进入作者后台。</p>`;
+        return;
+      }
+      $("messageList").innerHTML = messages.map((item) => `
+        <div class="message-item">
+          <strong>${item.name || "匿名用户"} <span class="muted small">${new Date(item.time).toLocaleString("zh-CN", { hour12: false })}</span></strong>
+          <p>${item.content}</p>
+          <div class="reply-box">作者回复：${item.reply || "暂未回复。正式小程序版将在这里显示后台回复。"}</div>
+        </div>
+      `).join("");
+    }
+
+    function submitMessage(event) {
+      event.preventDefault();
+      const content = $("messageContent").value.trim();
+      if (!content) {
+        $("messageContent").focus();
+        return;
+      }
+      const messages = JSON.parse(localStorage.getItem("gasStationCalcMessages") || "[]");
+      messages.unshift({
+        name: $("messageName").value.trim(),
+        contact: $("messageContact").value.trim(),
+        content,
+        reply: "",
+        time: new Date().toISOString(),
+      });
+      localStorage.setItem("gasStationCalcMessages", JSON.stringify(messages.slice(0, 20)));
+      $("messageContent").value = "";
+      renderMessages();
+    }
+
+    function drawRoundRect(ctx, x, y, w, h, r) {
+      const radius = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + w, y, x + w, y + h, radius);
+      ctx.arcTo(x + w, y + h, x, y + h, radius);
+      ctx.arcTo(x, y + h, x, y, radius);
+      ctx.arcTo(x, y, x + w, y, radius);
+      ctx.closePath();
+    }
+
+    function canvasText(ctx, text, x, y, maxWidth) {
+      ctx.fillText(text, x, y, maxWidth);
+    }
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.crossOrigin = "anonymous";
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = src;
+      });
+    }
+
+    function drawImageCover(ctx, image, x, y, w, h) {
+      const scale = Math.max(w / image.width, h / image.height);
+      const sw = w / scale;
+      const sh = h / scale;
+      const sx = (image.width - sw) / 2;
+      const sy = (image.height - sh) / 2;
+      ctx.drawImage(image, sx, sy, sw, sh, x, y, w, h);
+    }
+
+    async function createShareCanvas(result, stationName = "") {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1440;
+      const ctx = canvas.getContext("2d");
+      const blue = "#004b8d";
+      const midBlue = "#0067b1";
+      const cyan = "#00a3e0";
+      const ink = "#0b1f33";
+      const muted = "#657789";
+      const line = "#dbe8f2";
+
+      const bg = ctx.createLinearGradient(0, 0, 1080, 1440);
+      bg.addColorStop(0, "#f6fbff");
+      bg.addColorStop(0.55, "#edf7fd");
+      bg.addColorStop(1, "#ffffff");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, 1080, 1440);
+
+      ctx.fillStyle = "rgba(0, 163, 224, .14)";
+      ctx.beginPath();
+      ctx.arc(910, 120, 260, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "rgba(0, 75, 141, .08)";
+      ctx.beginPath();
+      ctx.arc(70, 1320, 320, 0, Math.PI * 2);
+      ctx.fill();
+
+      drawRoundRect(ctx, 70, 70, 940, 1300, 36);
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "rgba(11, 45, 78, .16)";
+      ctx.shadowBlur = 34;
+      ctx.shadowOffsetY = 16;
+      ctx.fill();
+      ctx.shadowColor = "transparent";
+
+      const header = ctx.createLinearGradient(70, 70, 1010, 290);
+      header.addColorStop(0, blue);
+      header.addColorStop(1, midBlue);
+      drawRoundRect(ctx, 70, 70, 940, 250, 36);
+      ctx.fillStyle = header;
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "800 46px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      canvasText(ctx, "加油站利润测算（合规经营）", 120, 160, 820);
+      ctx.font = "400 26px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      ctx.fillStyle = "rgba(255,255,255,.78)";
+      canvasText(ctx, "年度利润 · 成本 · 税费概要", 120, 210, 820);
+      ctx.fillStyle = cyan;
+      drawRoundRect(ctx, 120, 240, 150, 12, 6);
+      ctx.fill();
+
+      ctx.fillStyle = muted;
+      ctx.font = "500 28px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      canvasText(ctx, "年度净利润", 120, 395, 300);
+      ctx.fillStyle = result.profit < 0 ? "#c64646" : blue;
+      ctx.font = "850 72px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      canvasText(ctx, moneyWan(result.profit), 120, 485, 820);
+      if (stationName) {
+        ctx.fillStyle = ink;
+        ctx.font = "750 32px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+        canvasText(ctx, stationName, 120, 540, 820);
+      }
+
+      const rows = [
+        ["年度测算收入", moneyWan(result.revenue.total)],
+        ["年度成本合计", moneyWan(result.costs.total)],
+        ["年度税费合计", moneyWan(result.taxes.total)],
+        ["增值税应纳税额", moneyWan(result.taxes.vatPayable)],
+        ["92# 日均销量", `${n("vol92").toLocaleString("zh-CN")} 升/天`],
+        ["95# 日均销量", `${n("vol95").toLocaleString("zh-CN")} 升/天`],
+        ["柴油日均销量", `${n("volDiesel").toLocaleString("zh-CN")} 升/天`],
+      ];
+      let y = 600;
+      rows.forEach(([label, value]) => {
+        ctx.fillStyle = line;
+        ctx.fillRect(120, y + 30, 840, 2);
+        ctx.fillStyle = muted;
+        ctx.font = "400 28px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+        canvasText(ctx, label, 120, y, 360);
+        ctx.fillStyle = ink;
+        ctx.font = "750 31px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+        ctx.textAlign = "right";
+        canvasText(ctx, value, 960, y, 420);
+        ctx.textAlign = "left";
+        y += 72;
+      });
+
+      drawRoundRect(ctx, 120, 1135, 840, 132, 22);
+      ctx.fillStyle = "#f2f8fc";
+      ctx.fill();
+      ctx.fillStyle = blue;
+      ctx.font = "750 30px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      canvasText(ctx, "分享图展示概要和汽柴油销量", 152, 1190, 760);
+      ctx.fillStyle = muted;
+      ctx.font = "400 24px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      canvasText(ctx, "不展示城市、成本明细、税费明细和用户身份信息", 152, 1230, 760);
+
+      let qrImage = null;
+      let avatarImage = null;
+      try {
+        [qrImage, avatarImage] = await Promise.all([
+          loadImage("assets/jyzmt-qrcode.jpg"),
+          loadImage("assets/jyzmt-avatar.jpg"),
+        ]);
+      } catch {
+        qrImage = null;
+        avatarImage = null;
+      }
+
+      drawRoundRect(ctx, 120, 1290, 86, 86, 16);
+      ctx.fillStyle = "#e7f4fb";
+      ctx.fill();
+      ctx.save();
+      drawRoundRect(ctx, 120, 1290, 86, 86, 16);
+      ctx.clip();
+      if (qrImage) {
+        drawImageCover(ctx, qrImage, 120, 1290, 86, 86);
+      } else {
+        ctx.strokeStyle = "#9fc9e4";
+        ctx.lineWidth = 5;
+        for (let i = 0; i < 4; i += 1) {
+          ctx.strokeRect(136 + i * 14, 1306 + (i % 2) * 16, 11, 11);
+        }
+      }
+      ctx.restore();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(256, 1318, 26, 0, Math.PI * 2);
+      ctx.clip();
+      if (avatarImage) {
+        drawImageCover(ctx, avatarImage, 230, 1292, 52, 52);
+      } else {
+        ctx.fillStyle = "#dcecf6";
+        ctx.fillRect(230, 1292, 52, 52);
+      }
+      ctx.restore();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(256, 1318, 26, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = ink;
+      ctx.font = "700 24px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      canvasText(ctx, "加油站漫谈", 296, 1312, 650);
+      ctx.fillStyle = muted;
+      ctx.font = "400 22px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      canvasText(ctx, `测算时间：${result.time.toLocaleDateString("zh-CN")}`, 296, 1344, 650);
+      canvasText(ctx, "欢迎关注公众号，交流油站经营、利润测算和合规管理", 296, 1376, 650);
+
+      return canvas;
+    }
+
+    function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 4) {
+      const chars = String(text).split("");
+      const lines = [];
+      let lineText = "";
+      chars.forEach((char) => {
+        const testLine = lineText + char;
+        if (ctx.measureText(testLine).width > maxWidth && lineText) {
+          lines.push(lineText);
+          lineText = char;
+        } else {
+          lineText = testLine;
+        }
+      });
+      if (lineText) lines.push(lineText);
+      lines.slice(0, maxLines).forEach((lineItem, index) => {
+        ctx.fillText(lineItem, x, y + index * lineHeight, maxWidth);
+      });
+      return y + Math.min(lines.length, maxLines) * lineHeight;
+    }
+
+    function drawReportRow(ctx, label, value, x, y, w) {
+      ctx.fillStyle = "#dbe8f2";
+      ctx.fillRect(x, y + 30, w, 2);
+      ctx.fillStyle = "#657789";
+      ctx.font = "400 24px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      canvasText(ctx, label, x, y, w * 0.45);
+      ctx.fillStyle = "#0b1f33";
+      ctx.font = "750 26px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      ctx.textAlign = "right";
+      canvasText(ctx, value, x + w, y, w * 0.55);
+      ctx.textAlign = "left";
+      return y + 58;
+    }
+
+    function drawReportSectionTitle(ctx, title, x, y) {
+      ctx.fillStyle = "#004b8d";
+      ctx.font = "800 30px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      canvasText(ctx, title, x, y, 860);
+      ctx.fillStyle = "#00a3e0";
+      drawRoundRect(ctx, x, y + 14, 118, 8, 4);
+      ctx.fill();
+      return y + 48;
+    }
+
+    async function createFullReportCanvas(result, stationName = "") {
+      const context = getReportContext(result);
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 2380;
+      const ctx = canvas.getContext("2d");
+      const blue = "#004b8d";
+      const midBlue = "#0067b1";
+      const cyan = "#00a3e0";
+      const ink = "#0b1f33";
+      const muted = "#657789";
+
+      const bg = ctx.createLinearGradient(0, 0, 1080, 2380);
+      bg.addColorStop(0, "#f6fbff");
+      bg.addColorStop(0.55, "#edf7fd");
+      bg.addColorStop(1, "#ffffff");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, 1080, 2380);
+
+      drawRoundRect(ctx, 60, 60, 960, 2260, 34);
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "rgba(11, 45, 78, .14)";
+      ctx.shadowBlur = 34;
+      ctx.shadowOffsetY = 16;
+      ctx.fill();
+      ctx.shadowColor = "transparent";
+
+      const header = ctx.createLinearGradient(60, 60, 1020, 320);
+      header.addColorStop(0, blue);
+      header.addColorStop(1, midBlue);
+      drawRoundRect(ctx, 60, 60, 960, 300, 34);
+      ctx.fillStyle = header;
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "850 52px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      canvasText(ctx, "加油站利润测算报告", 110, 155, 860);
+      ctx.font = "500 28px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      ctx.fillStyle = "rgba(255,255,255,.82)";
+      canvasText(ctx, stationName || "未命名加油站", 110, 210, 860);
+      canvasText(ctx, `测算时间：${result.time.toLocaleDateString("zh-CN")}`, 110, 255, 860);
+      ctx.fillStyle = cyan;
+      drawRoundRect(ctx, 110, 290, 156, 12, 6);
+      ctx.fill();
+
+      let y = 430;
+      y = drawReportSectionTitle(ctx, "一、经营概览", 110, y);
+      y = drawReportRow(ctx, "年度测算收入", moneyWan(result.revenue.total), 110, y, 860);
+      y = drawReportRow(ctx, "年度成本合计", moneyWan(result.costs.total), 110, y, 860);
+      y = drawReportRow(ctx, "年度税费合计", moneyWan(result.taxes.total), 110, y, 860);
+      y = drawReportRow(ctx, "年度净利润", moneyWan(result.profit), 110, y, 860);
+      y = drawReportRow(ctx, "年度油品销量", `${context.totalTons.toFixed(2)} 吨`, 110, y, 860);
+
+      y += 28;
+      y = drawReportSectionTitle(ctx, "二、压力指标", 110, y);
+      y = drawReportRow(ctx, "净利率", percent(context.profitRate), 110, y, 860);
+      y = drawReportRow(ctx, "成本占测算收入", percent(context.costRate), 110, y, 860);
+      y = drawReportRow(ctx, "税费占测算收入", percent(context.taxRate), 110, y, 860);
+      y = drawReportRow(ctx, "油品毛利率", percent(context.fuelMarginRate), 110, y, 860);
+
+      y += 28;
+      y = drawReportSectionTitle(ctx, "三、油品结构", 110, y);
+      y = drawReportRow(ctx, "92# 日均 / 年销量", `${n("vol92").toLocaleString("zh-CN")} 升/天 / ${result.tons.t92.toFixed(2)} 吨`, 110, y, 860);
+      y = drawReportRow(ctx, "95# 日均 / 年销量", `${n("vol95").toLocaleString("zh-CN")} 升/天 / ${result.tons.t95.toFixed(2)} 吨`, 110, y, 860);
+      y = drawReportRow(ctx, "柴油日均 / 年销量", `${n("volDiesel").toLocaleString("zh-CN")} 升/天 / ${result.tons.td.toFixed(2)} 吨`, 110, y, 860);
+
+      y += 28;
+      y = drawReportSectionTitle(ctx, "四、成本结构", 110, y);
+      y = drawReportRow(ctx, "进油成本", moneyWan(result.costs.purchaseCost), 110, y, 860);
+      y = drawReportRow(ctx, "人工及社保", moneyWan(result.costs.wage + result.costs.social), 110, y, 860);
+      y = drawReportRow(ctx, "运营及赠品", moneyWan(result.costs.ops + result.costs.gift), 110, y, 860);
+      y = drawReportRow(ctx, "证照及行政合规支出", moneyWan(result.costs.complianceAdmin), 110, y, 860);
+      y = drawReportRow(ctx, "租金及资产折旧", moneyWan(result.costs.landRent + result.costs.depreciation), 110, y, 860);
+      y = drawReportRow(ctx, "财务成本", moneyWan(result.costs.financeCost), 110, y, 860);
+      y = drawReportRow(ctx, "保险及税费类成本", moneyWan(result.costs.insurance + result.costs.propertyTax + result.costs.landUseTax), 110, y, 860);
+
+      y += 28;
+      y = drawReportSectionTitle(ctx, "五、税费摘要", 110, y);
+      y = drawReportRow(ctx, "增值税应纳税额", moneyWan(result.taxes.vatPayable), 110, y, 860);
+      y = drawReportRow(ctx, "城建税及附加", moneyWan(result.taxes.cityTax + result.taxes.edu + result.taxes.localEdu), 110, y, 860);
+      y = drawReportRow(ctx, "印花税", moneyWan(result.taxes.stamp), 110, y, 860);
+      y = drawReportRow(ctx, "企业所得税", moneyWan(result.taxes.corpTax), 110, y, 860);
+
+      y += 28;
+      y = drawReportSectionTitle(ctx, "六、报告提示", 110, y);
+      context.actions.forEach((item, index) => {
+        ctx.fillStyle = "#0b1f33";
+        ctx.font = "800 25px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+        canvasText(ctx, `${index + 1}. ${item[0]}`, 110, y, 860);
+        ctx.fillStyle = muted;
+        ctx.font = "400 23px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+        y = wrapCanvasText(ctx, item[1], 110, y + 34, 860, 31, 2) + 12;
+      });
+
+      ctx.fillStyle = "#f2f8fc";
+      drawRoundRect(ctx, 110, 2125, 860, 94, 18);
+      ctx.fill();
+      ctx.fillStyle = muted;
+      ctx.font = "400 21px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      wrapCanvasText(ctx, "免责声明：本工具测算结果基于用户自行填写的数据和系统内置估算公式，仅用于经营参考，不构成税务、财务、法律或投资建议，不作为纳税申报依据。", 138, 2162, 804, 28, 2);
+
+      let qrImage = null;
+      let avatarImage = null;
+      try {
+        [qrImage, avatarImage] = await Promise.all([
+          loadImage("assets/jyzmt-qrcode.jpg"),
+          loadImage("assets/jyzmt-avatar.jpg"),
+        ]);
+      } catch {
+        qrImage = null;
+        avatarImage = null;
+      }
+
+      drawRoundRect(ctx, 110, 2250, 76, 76, 14);
+      ctx.fillStyle = "#e7f4fb";
+      ctx.fill();
+      ctx.save();
+      drawRoundRect(ctx, 110, 2250, 76, 76, 14);
+      ctx.clip();
+      if (qrImage) drawImageCover(ctx, qrImage, 110, 2250, 76, 76);
+      ctx.restore();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(226, 2276, 24, 0, Math.PI * 2);
+      ctx.clip();
+      if (avatarImage) {
+        drawImageCover(ctx, avatarImage, 202, 2252, 48, 48);
+      } else {
+        ctx.fillStyle = "#dcecf6";
+        ctx.fillRect(202, 2252, 48, 48);
+      }
+      ctx.restore();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(226, 2276, 24, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = ink;
+      ctx.font = "700 23px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      canvasText(ctx, "加油站漫谈", 272, 2272, 650);
+      ctx.fillStyle = muted;
+      ctx.font = "400 20px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
+      canvasText(ctx, "欢迎关注公众号，交流油站经营、利润测算和合规管理", 272, 2304, 650);
+
+      return canvas;
+    }
+
+    function canvasToBlob(canvas) {
+      return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), "image/png", 0.96));
+    }
+
+    async function downloadResultImage(result, stationName) {
+      const canvas = await createShareCanvas(result, stationName);
+      const blob = await canvasToBlob(canvas);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const safeName = stationName ? stationName.replace(/[\\/:*?"<>|]/g, "").slice(0, 20) : "油站";
+      link.download = `${safeName}-利润测算-${result.time.toISOString().slice(0, 10)}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    async function downloadFullReportImage(result, stationName) {
+      const canvas = await createFullReportCanvas(result, stationName);
+      const blob = await canvasToBlob(canvas);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const safeName = stationName ? stationName.replace(/[\\/:*?"<>|]/g, "").slice(0, 20) : "油站";
+      link.download = `${safeName}-利润测算报告-${result.time.toISOString().slice(0, 10)}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    async function shareResultImage(stationName) {
+      const result = lastResult;
+      if (!result) return;
+      const canvas = await createShareCanvas(result, stationName);
+      const blob = await canvasToBlob(canvas);
+      const safeName = stationName ? stationName.replace(/[\\/:*?"<>|]/g, "").slice(0, 20) : "油站";
+      const file = new File([blob], `${safeName}-利润测算-${result.time.toISOString().slice(0, 10)}.png`, { type: "image/png" });
+      try {
+        if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+          await navigator.share({
+            files: [file],
+            title: "加油站利润测算（合规经营）",
+            text: "年度利润测算结果图片",
+          });
+          $("copyShareBtn").textContent = "已调起分享";
+        } else {
+          await downloadResultImage(result, stationName);
+          $("copyShareBtn").textContent = "已生成图片";
+        }
+      } catch {
+        await downloadResultImage(result, stationName);
+        $("copyShareBtn").textContent = "已下载图片";
+      }
+      setTimeout(() => $("copyShareBtn").textContent = "分享结果图片", 1400);
+    }
+
+    async function saveResultImage(stationName) {
+      const result = lastResult;
+      if (!result) return;
+      await downloadResultImage(result, stationName);
+      saveHistory();
+      $("saveBtn").textContent = "已保存图片";
+      setTimeout(() => $("saveBtn").textContent = "保存图片到本机", 1400);
+    }
+
+    async function shareFullReportImage(stationName) {
+      const result = lastResult;
+      if (!result) return;
+      const canvas = await createFullReportCanvas(result, stationName);
+      const blob = await canvasToBlob(canvas);
+      const safeName = stationName ? stationName.replace(/[\\/:*?"<>|]/g, "").slice(0, 20) : "油站";
+      const file = new File([blob], `${safeName}-利润测算报告-${result.time.toISOString().slice(0, 10)}.png`, { type: "image/png" });
+      try {
+        if (navigator.canShare && navigator.canShare({ files: [file] }) && navigator.share) {
+          await navigator.share({
+            files: [file],
+            title: "加油站利润测算报告",
+            text: "加油站利润测算报告图片",
+          });
+          $("reportShareBtn").textContent = "已调起分享";
+        } else {
+          await downloadFullReportImage(result, stationName);
+          $("reportShareBtn").textContent = "已生成图片";
+        }
+      } catch {
+        await downloadFullReportImage(result, stationName);
+        $("reportShareBtn").textContent = "已下载图片";
+      }
+      setTimeout(() => $("reportShareBtn").textContent = "分享完整报告图片", 1400);
+    }
+
+    async function saveFullReportImage(stationName) {
+      const result = lastResult;
+      if (!result) return;
+      await downloadFullReportImage(result, stationName);
+      saveHistory();
+      $("reportSaveBtn").textContent = "已保存图片";
+      setTimeout(() => $("reportSaveBtn").textContent = "保存完整报告图片", 1400);
+    }
+
+    function openStationModal(action) {
+      if (!lastResult) {
+        pendingImageAction = action;
+        startCalculation();
+        return;
+      }
+      pendingImageAction = action;
+      $("stationModal").classList.add("active");
+      $("stationModal").setAttribute("aria-hidden", "false");
+      $("stationNameInput").value = localStorage.getItem("lastStationName") || "";
+      setTimeout(() => $("stationNameInput").focus(), 60);
+    }
+
+    function closeStationModal() {
+      pendingImageAction = null;
+      $("stationModal").classList.remove("active");
+      $("stationModal").setAttribute("aria-hidden", "true");
+    }
+
+    async function confirmStationName() {
+      const stationName = $("stationNameInput").value.trim();
+      if (!stationName) {
+        $("stationNameInput").focus();
+        return;
+      }
+      localStorage.setItem("lastStationName", stationName);
+      const action = pendingImageAction;
+      closeStationModal();
+      if (action === "share") await shareResultImage(stationName);
+      if (action === "save") await saveResultImage(stationName);
+      if (action === "reportShare") await shareFullReportImage(stationName);
+      if (action === "reportSave") await saveFullReportImage(stationName);
+    }
+
+    function switchPage(targetId) {
+      document.querySelectorAll(".page-view").forEach((view) => {
+        view.classList.toggle("active", view.id === targetId);
+      });
+      document.querySelectorAll("[data-page-target]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.pageTarget === targetId);
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    $("calculatorForm").querySelectorAll("input, select").forEach((el) => el.addEventListener("input", markInputsDirty));
+    document.querySelectorAll("[data-page-target]").forEach((btn) => btn.addEventListener("click", () => switchPage(btn.dataset.pageTarget)));
+    $("customMargin").addEventListener("change", () => { syncPanels(); markInputsDirty(); });
+    $("customPrice").addEventListener("change", () => { syncPanels(); markInputsDirty(); });
+    document.querySelectorAll("[data-margin-unit]").forEach((btn) => btn.addEventListener("click", () => updateMarginUnit(btn.dataset.marginUnit)));
+    document.querySelectorAll("[data-wage-mode]").forEach((btn) => btn.addEventListener("click", () => setWageMode(btn.dataset.wageMode)));
+    $("startCalcBtn").addEventListener("click", startCalculation);
+    $("sampleBtn").addEventListener("click", setSample);
+    $("mobileSampleBtn").addEventListener("click", setSample);
+    $("resetBtn").addEventListener("click", resetAll);
+    $("saveBtn").addEventListener("click", () => openStationModal("save"));
+    $("copyShareBtn").addEventListener("click", () => openStationModal("share"));
+    $("reportShareBtn").addEventListener("click", () => openStationModal("reportShare"));
+    $("reportSaveBtn").addEventListener("click", () => openStationModal("reportSave"));
+    $("reviewCancelBtn").addEventListener("click", closeReviewModal);
+    $("reviewConfirmBtn").addEventListener("click", confirmReviewedResult);
+    $("stationCancelBtn").addEventListener("click", closeStationModal);
+    $("stationConfirmBtn").addEventListener("click", confirmStationName);
+    $("stationNameInput").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") confirmStationName();
+      if (event.key === "Escape") closeStationModal();
+    });
+    $("clearHistoryBtn").addEventListener("click", () => { localStorage.removeItem("gasStationCalcHistory"); renderHistory(); });
+    $("messageForm").addEventListener("submit", submitMessage);
+    $("scrollResultBtn").addEventListener("click", () => {
+      if (!lastResult) {
+        startCalculation();
+        return;
+      }
+      switchPage("calculatorPage");
+      setTimeout(() => document.querySelector(".hero-result").scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+    });
+
+    syncPanels();
+    render();
+    renderHistory();
+    renderMessages();
+  </script>
+</body>
+</html>
