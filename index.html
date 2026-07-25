@@ -467,6 +467,17 @@
       white-space: nowrap;
     }
 
+    .report-entry-btn {
+      width: 100%;
+      margin-top: 14px;
+      display: none;
+      justify-content: center;
+    }
+
+    .report-entry-btn.active {
+      display: inline-flex;
+    }
+
     .detail-list {
       display: grid;
       gap: 8px;
@@ -805,18 +816,37 @@
     }
 
     .asset-lead-intro {
-      border: 1px solid #cfe1ee;
+      border: 1px solid #f2c4c4;
       border-radius: 8px;
       background:
-        linear-gradient(135deg, #f5fbff 0%, #ffffff 100%);
+        linear-gradient(135deg, #fff4f3 0%, #f6fbff 58%, #ffffff 100%);
       padding: 16px;
       display: grid;
       gap: 8px;
     }
 
+    .asset-service-section {
+      border-color: #f2c4c4;
+      box-shadow: 0 18px 42px rgba(198, 70, 70, .13);
+    }
+
+    .asset-service-section .section-head {
+      border-bottom-color: #f2c4c4;
+      background: linear-gradient(90deg, #fff0f0, #f6fbff);
+    }
+
+    .asset-service-section .section-title {
+      color: #b82935;
+    }
+
+    .asset-service-section .section-note {
+      color: #c64646;
+      font-weight: 800;
+    }
+
     .asset-lead-intro h3 {
       margin: 0;
-      color: var(--green-2);
+      color: #b82935;
       font-size: 20px;
     }
 
@@ -825,6 +855,24 @@
       color: #17324a;
       font-size: 14px;
       line-height: 1.65;
+    }
+
+    .asset-free-badge {
+      width: fit-content;
+      border-radius: 999px;
+      background: #ffe4e4;
+      color: #b82935;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .asset-submit-btn {
+      background: linear-gradient(135deg, #c64646, #e15a4f);
+    }
+
+    .asset-submit-btn:hover {
+      background: linear-gradient(135deg, #b82935, #cf3e3e);
     }
 
     .consent-row {
@@ -1277,8 +1325,17 @@
           <div class="section-body">
             <div class="grid two">
               <label class="field"><span>土地/油站租金 元/年</span><input id="landRent" type="number" inputmode="decimal" min="0" step="1000" value="0"></label>
+              <label class="field">
+                <span>租金发票抵扣方式</span>
+                <select id="landRentVatRate">
+                  <option value="0">无可抵扣专票</option>
+                  <option value="0.05">5%专票（出租方简易计税）</option>
+                  <option value="0.09">9%专票（一般计税）</option>
+                </select>
+              </label>
               <label class="field"><span>资产折旧（设备、基础设施工程摊销等）元/年</span><input id="depreciation" type="number" inputmode="decimal" min="0" step="1000" value="0"></label>
             </div>
+            <p class="fee-tip">提示：只有取得可抵扣增值税专用发票时，才选择 5% 或 9%；普通发票不按进项抵扣测算。</p>
             <p class="muted small">财务成本：贷款利息、刷卡/支付手续费。</p>
             <div class="grid two">
               <label class="field"><span>贷款金额 元</span><input id="loanAmount" type="number" inputmode="decimal" min="0" step="10000" value="0"></label>
@@ -1339,6 +1396,7 @@
             <div class="kpi"><span>成本合计</span><strong id="kpiCost">0.00 万</strong></div>
             <div class="kpi"><span>税费合计</span><strong id="kpiTax">0.00 万</strong></div>
           </div>
+          <button class="btn report-entry-btn" type="button" id="reportEntryBtn">查看利润测算报告</button>
         </section>
 
         <div class="alert" id="warningBox"></div>
@@ -1508,15 +1566,16 @@
         </div>
       </section>
 
-      <section class="section report-share-panel">
+      <section class="section report-share-panel asset-service-section">
         <div class="section-head">
           <h2 class="section-title">油站资产流转服务</h2>
-          <span class="section-note">自愿登记</span>
+          <span class="section-note">免费登记</span>
         </div>
         <div class="section-body">
           <div class="asset-lead-intro">
+            <div class="asset-free-badge">免费登记，免费推介，不公开展示</div>
             <h3>油站转让/出租信息登记</h3>
-            <p>如果您有加油站出售、出租、整体转让或合作经营需求，可以留下联系方式和基本情况。我们长期接触油站投资人、经营者和承租方，可根据您的实际诉求协助匹配意向客户。</p>
+            <p>如果您有加油站出售、出租、整体转让或合作经营需求，可以免费登记联系方式和基本情况。我们长期接触油站投资人、经营者和承租方，可根据您的实际诉求协助匹配意向客户。</p>
           </div>
           <form class="message-form" id="assetLeadForm">
             <div class="grid two">
@@ -1532,8 +1591,8 @@
               <label class="field"><span>油站类型</span><select id="assetStationType"><option value="">请选择</option><option>城区站</option><option>国省道站</option><option>乡镇站</option><option>其他</option></select></label>
               <label class="field"><span>是否有土地证</span><select id="assetLandCert"><option value="">请选择</option><option>有</option><option>没有</option><option>不确定</option><option>不方便透露</option></select></label>
             </div>
-            <label class="consent-row"><input id="assetConsent" type="checkbox"> <span>我确认以上信息为自愿提交，同意“加油站漫谈”作者或服务团队仅用于油站转让、出租、合作经营等沟通对接，不公开展示。</span></label>
-            <button class="btn" type="submit">提交油站流转需求</button>
+            <label class="consent-row"><input id="assetConsent" type="checkbox"> <span>我确认以上信息为自愿提交，同意“加油站漫谈”作者或服务团队仅用于油站转让、出租、合作经营等免费推介和沟通对接，不公开展示。</span></label>
+            <button class="btn asset-submit-btn" type="submit">免费登记油站流转需求</button>
             <div class="lead-status" id="assetLeadStatus">已收到您的信息。正式小程序上线后，这类信息会进入后台，便于作者跟进和匹配意向方。</div>
             <p class="muted small">H5 预览版会先保存在本机；正式小程序版会写入后台，作者可查看并跟进。</p>
           </form>
@@ -1588,7 +1647,8 @@
                 <code>贷款利息 = 贷款金额 × 年化利率</code>
                 <code>刷卡/支付手续费 = 油品含税销售额 × 支付占比 × 手续费率‰ ÷ 1000</code>
                 <code>财务成本 = 贷款利息 + 刷卡/支付手续费</code>
-                土地/油站租金、资产折旧（设备、基础设施工程摊销等）、保险、房产税、城镇土地使用税等按年度金额直接计入成本。
+                <code>取得租金可抵扣专票时：土地/油站租金成本 = 含税租金 ÷ (1 + 发票税率)</code>
+                未取得可抵扣专票时，土地/油站租金按填写金额直接计入成本；资产折旧（设备、基础设施工程摊销等）、保险、房产税、城镇土地使用税等按年度金额直接计入成本。
               </div>
             </div>
 
@@ -1596,9 +1656,11 @@
               <div class="formula-title">5. 税费与净利润</div>
               <div class="formula-content">
                 <code>销项税额 = 油品不含税销售收入 × 13%</code>
-                <code>进项税额 = 进油成本 × 13%</code>
+                <code>租金专票进项税额 = 含税租金 - 土地/油站租金成本</code>
+                <code>进项税额 = 进油成本 × 13% + 租金专票进项税额</code>
                 <code>增值税应纳税额 = max(销项税额 - 进项税额, 0)</code>
                 <code>城建税 = 增值税 × 所在地税率（7% / 5% / 1%）</code>
+                <code>教育费附加 = 增值税 × 3%；地方教育附加 = 增值税 × 2%</code>
                 <code>印花税 = 油品不含税销售收入 × 0.03%</code>
                 <code>企业所得税 = max(应纳税所得额, 0) × 所得税测算率</code>
                 <code>年度净利润 = 利润测算收入合计 - 成本合计 - 税费合计</code>
@@ -1812,7 +1874,10 @@
       const gift = n("giftCost") * 12;
       const license = $("hasLicense").checked ? n("licenseCost") : 0;
       const admin = n("adminCost");
-      const landRent = n("landRent");
+      const landRentGross = n("landRent");
+      const landRentVatRate = parseFloat($("landRentVatRate").value) || 0;
+      const landRent = landRentVatRate > 0 ? landRentGross / (1 + landRentVatRate) : landRentGross;
+      const landRentInputVat = landRentGross - landRent;
       const depreciation = n("depreciation");
       const loanInterest = n("loanAmount") * pct(n("interestRate"));
       const cardFee = grossFuelSales * pct(Math.min(n("cardShare"), 100)) * (n("cardRate") / 1000);
@@ -1825,7 +1890,8 @@
         landRent + depreciation + loanInterest + cardFee + insurance + propertyTax + landUseTax;
 
       const outputVat = revenue.fuel * VAT;
-      const inputVat = purchaseCost * VAT;
+      const purchaseInputVat = purchaseCost * VAT;
+      const inputVat = purchaseInputVat + landRentInputVat;
       const vatPayable = Math.max(0, outputVat - inputVat);
       const retainedVat = Math.max(0, inputVat - outputVat);
       const cityTax = vatPayable * parseFloat($("cityTaxRate").value);
@@ -1849,8 +1915,8 @@
       return {
         time: new Date(),
         tons, margins, prices, grossFuelSales, revenue,
-        costs: { purchaseCost, wage, social, ops, gift, license, admin, complianceAdmin, landRent, depreciation, loanInterest, cardFee, financeCost, insurance, propertyTax, landUseTax, total: costTotal },
-        taxes: { outputVat, inputVat, vatPayable, retainedVat, cityTax, edu, localEdu, stamp, taxableIncome, corpTax, total: taxTotal },
+        costs: { purchaseCost, wage, social, ops, gift, license, admin, complianceAdmin, landRent, landRentGross, depreciation, loanInterest, cardFee, financeCost, insurance, propertyTax, landUseTax, total: costTotal },
+        taxes: { outputVat, purchaseInputVat, landRentInputVat, inputVat, vatPayable, retainedVat, cityTax, edu, localEdu, stamp, taxableIncome, corpTax, total: taxTotal },
         profit,
         warnings,
       };
@@ -1887,6 +1953,7 @@
       if (totalDaily > 0 && n("opsCost") <= 0) warnings.push("月综合运营费用为 0，请确认水电、维修、办公、杂费等是否需要计入。");
       if (n("loanAmount") > 0 && n("interestRate") <= 0) warnings.push("已填写贷款金额，但利率为 0，请确认贷款利息是否漏填。");
       if (n("loanAmount") <= 0 && n("interestRate") > 0) warnings.push("已填写利率，但贷款金额为 0，请确认资金成本是否需要计入。");
+      if (n("landRent") <= 0 && parseFloat($("landRentVatRate").value) > 0) warnings.push("已选择租金专票抵扣方式，但土地/油站租金为 0，请确认是否需要填写租金。");
 
       rows.forEach((item) => {
         if (item.daily <= 0) return;
@@ -2047,6 +2114,7 @@
       $("reportShareVolumes").textContent = "0 / 0 / 0 升/天";
       $("reportShareTime").textContent = "测算时间：-";
       $("scrollResultBtn").textContent = "开始计算";
+      $("reportEntryBtn").classList.remove("active");
     }
 
     function render(result) {
@@ -2057,6 +2125,7 @@
       lastResult = result;
       $("profitValue").textContent = moneyWan(result.profit);
       $("scrollResultBtn").textContent = "看结果";
+      $("reportEntryBtn").classList.add("active");
       $("profitValue").classList.toggle("loss", result.profit < 0);
       $("profitSub").textContent = `测算时间：${result.time.toLocaleString("zh-CN", { hour12: false })}`;
       $("kpiRevenue").textContent = plainWan(result.revenue.total);
@@ -2096,7 +2165,9 @@
 
       $("taxList").innerHTML = [
         line("销项税额", result.taxes.outputVat),
-        line("进项税额", result.taxes.inputVat),
+        line("进油进项税额", result.taxes.purchaseInputVat),
+        line("租金专票进项税额", result.taxes.landRentInputVat),
+        line("进项税额合计", result.taxes.inputVat),
         line("增值税应纳税额", result.taxes.vatPayable),
         line("城建税", result.taxes.cityTax),
         line("教育费附加", result.taxes.edu),
@@ -2197,6 +2268,7 @@
       Object.entries(sample).forEach(([id, value]) => { $(id).value = value; });
       $("hasSocial").checked = true;
       $("hasLicense").checked = true;
+      $("landRentVatRate").value = "0";
       lastResult = null;
       renderEmptyResult("示例数据已填入，点击“开始计算”查看测算结果。");
     }
@@ -2215,6 +2287,7 @@
       $("saleDiesel").value = 6857;
       $("cardShare").value = 100;
       $("cardRate").value = 0.3;
+      $("landRentVatRate").value = "0";
       $("hasSocial").checked = true;
       $("hasLicense").checked = true;
       $("customMargin").checked = false;
@@ -2909,6 +2982,7 @@
     document.querySelectorAll("[data-margin-unit]").forEach((btn) => btn.addEventListener("click", () => updateMarginUnit(btn.dataset.marginUnit)));
     document.querySelectorAll("[data-wage-mode]").forEach((btn) => btn.addEventListener("click", () => setWageMode(btn.dataset.wageMode)));
     $("startCalcBtn").addEventListener("click", startCalculation);
+    $("reportEntryBtn").addEventListener("click", () => switchPage("reportPage"));
     $("sampleBtn").addEventListener("click", setSample);
     $("mobileSampleBtn").addEventListener("click", setSample);
     $("resetBtn").addEventListener("click", resetAll);
