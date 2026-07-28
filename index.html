@@ -438,6 +438,41 @@
       line-height: 1.5;
     }
 
+    .profit-compare {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .profit-compare-item {
+      border: 1px solid #cfe1ee;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .82);
+      padding: 10px;
+      min-width: 0;
+    }
+
+    .profit-compare-item span,
+    .profit-compare-item small {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .profit-compare-item strong {
+      display: block;
+      margin-top: 6px;
+      color: var(--green-2);
+      font-size: 20px;
+      line-height: 1.15;
+    }
+
+    .profit-compare-item.ebitda strong {
+      color: #b82935;
+    }
+
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -708,6 +743,16 @@
       backdrop-filter: blur(8px);
     }
 
+    .report-profit-pair {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .report-profit-pair > div {
+      min-width: 0;
+    }
+
     .report-profit span {
       display: block;
       color: rgba(255, 255, 255, .74);
@@ -717,9 +762,13 @@
     .report-profit strong {
       display: block;
       margin-top: 8px;
-      font-size: clamp(28px, 5vw, 44px);
+      font-size: clamp(24px, 4vw, 40px);
       line-height: 1;
       color: #dff5ff;
+    }
+
+    .report-profit .ebitda strong {
+      color: #ffe1df;
     }
 
     .report-grid {
@@ -1170,7 +1219,7 @@
 
       .mobile-actions {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: .8fr 1fr 1fr;
       }
     }
   </style>
@@ -1336,6 +1385,11 @@
               <label class="field"><span>资产折旧（设备、基础设施工程摊销等）元/年</span><input id="depreciation" type="number" inputmode="decimal" min="0" step="1000" value="0"></label>
             </div>
             <p class="fee-tip">提示：只有取得可抵扣增值税专用发票时，才选择 5% 或 9%；普通发票不按进项抵扣测算。</p>
+            <div class="grid two">
+              <label class="field"><span>汽油共同费用分摊系数</span><input id="gasCostWeight" type="number" inputmode="decimal" min="0.01" step="0.1" value="3"></label>
+              <label class="field"><span>柴油共同费用分摊系数</span><input id="dieselCostWeight" type="number" inputmode="decimal" min="0.01" step="0.1" value="1"></label>
+            </div>
+            <p class="fee-tip">提示：共同费用按“销量升数 × 分摊系数”分摊，默认汽油:柴油 = 3:1；汽油提枪率高、服务频次高、客单升数低时，可适当提高汽油系数；如希望完全按销量比例分摊，可填 1:1。</p>
             <p class="muted small">财务成本：贷款利息、刷卡/支付手续费。</p>
             <div class="grid two">
               <label class="field"><span>贷款金额 元</span><input id="loanAmount" type="number" inputmode="decimal" min="0" step="10000" value="0"></label>
@@ -1343,9 +1397,9 @@
             </div>
             <div class="grid two">
               <label class="field"><span>刷卡/支付占比 %</span><input id="cardShare" type="number" inputmode="decimal" min="0" max="100" step="0.01" value="100"></label>
-              <label class="field"><span>刷卡/支付手续费率 ‰</span><input id="cardRate" type="number" inputmode="decimal" min="0" step="0.01" value="0.3"></label>
+              <label class="field"><span>刷卡/支付手续费率 ‰</span><input id="cardRate" type="number" inputmode="decimal" min="0" step="0.01" value="3"></label>
             </div>
-            <p class="fee-tip">提示：刷卡/支付手续费率按千分比填写，默认 0.3‰；如实际通道费率不同，请按合同或对账单修改。</p>
+            <p class="fee-tip">提示：刷卡/支付手续费率按千分比填写，默认 3‰；如实际通道费率不同，请按合同或对账单修改。</p>
             <div class="grid">
               <label class="field"><span>商业保险费用 元/年</span><input id="insuranceCost" type="number" inputmode="decimal" min="0" step="1000" value="0"></label>
               <label class="field"><span>房产税 元/年</span><input id="propertyTax" type="number" inputmode="decimal" min="0" step="1000" value="0"></label>
@@ -1380,7 +1434,10 @@
 
         <section class="section">
           <div class="section-body calc-action">
-            <button class="btn calc-start" type="button" id="startCalcBtn">开始计算</button>
+            <div class="grid two">
+              <button class="btn calc-start" type="button" id="startCalcMonthBtn">按月度计算</button>
+              <button class="btn calc-start" type="button" id="startCalcYearBtn">按年度计算</button>
+            </div>
             <p class="calc-action-copy">点击后先检查漏填项和明显异常数据，确认无误后再生成测算结果和分享图片。</p>
           </div>
         </section>
@@ -1388,15 +1445,26 @@
 
       <aside class="result-stack result-sticky">
         <section class="hero-result" aria-live="polite">
-          <div class="profit-label">年度净利润</div>
+          <div class="profit-label" id="profitLabel">年度净利润</div>
           <div class="profit-value" id="profitValue">待计算</div>
-          <div class="profit-sub" id="profitSub">填写完成后点击“开始计算”，系统会先检查漏填项和异常数据。</div>
+          <div class="profit-sub" id="profitSub">填写完成后点击“按月度计算”或“按年度计算”，系统会先检查漏填项和异常数据。</div>
+          <div class="profit-compare">
+            <div class="profit-compare-item">
+              <span id="heroNetProfitLabel">年度净利润</span>
+              <strong id="heroNetProfit">0.00 万</strong>
+            </div>
+            <div class="profit-compare-item ebitda">
+              <span id="heroEbitdaProfitLabel">年度EBITDA（息税折旧摊销前利润）</span>
+              <strong id="heroEbitdaProfit">0.00 万</strong>
+              <small>息税折旧摊销前利润</small>
+            </div>
+          </div>
           <div class="kpi-grid">
             <div class="kpi"><span>测算收入</span><strong id="kpiRevenue">0.00 万</strong></div>
             <div class="kpi"><span>成本合计</span><strong id="kpiCost">0.00 万</strong></div>
             <div class="kpi"><span>税费合计</span><strong id="kpiTax">0.00 万</strong></div>
           </div>
-          <button class="btn report-entry-btn" type="button" id="reportEntryBtn">查看利润测算报告</button>
+          <button class="btn report-entry-btn" type="button" id="reportEntryBtn">查看利润测算报告（完整版）</button>
         </section>
 
         <div class="alert" id="warningBox"></div>
@@ -1429,10 +1497,10 @@
           <div class="section-body">
             <div class="share-card" id="shareCard">
               <h3>加油站利润测算（合规经营）</h3>
-              <div class="share-row"><span>年度测算收入</span><strong id="shareRevenue">¥0.00 万</strong></div>
-              <div class="share-row"><span>年度成本合计</span><strong id="shareCost">¥0.00 万</strong></div>
-              <div class="share-row"><span>年度税费合计</span><strong id="shareTax">¥0.00 万</strong></div>
-              <div class="share-row"><span>年度净利润</span><strong id="shareProfit">¥0.00 万</strong></div>
+              <div class="share-row"><span id="shareRevenueLabel">年度测算收入</span><strong id="shareRevenue">¥0.00 万</strong></div>
+              <div class="share-row"><span id="shareCostLabel">年度成本合计</span><strong id="shareCost">¥0.00 万</strong></div>
+              <div class="share-row"><span id="shareTaxLabel">年度税费合计</span><strong id="shareTax">¥0.00 万</strong></div>
+              <div class="share-row"><span id="shareProfitLabel">年度净利润</span><strong id="shareProfit">¥0.00 万</strong></div>
               <div class="share-row"><span>92# 日均销量</span><strong id="shareVol92">0 升/天</strong></div>
               <div class="share-row"><span>95# 日均销量</span><strong id="shareVol95">0 升/天</strong></div>
               <div class="share-row"><span>柴油日均销量</span><strong id="shareVolDiesel">0 升/天</strong></div>
@@ -1473,8 +1541,16 @@
           <p>面向加油站投资人、经营者和站长使用，帮助快速看清油站年度利润、成本结构、税费压力和经营风险，便于复盘经营情况、评估投资收益和制定下一步调整方案。</p>
         </div>
         <div class="report-profit">
-          <span>报告口径年度净利润</span>
-          <strong id="reportProfit">¥0.00 万</strong>
+          <div class="report-profit-pair">
+            <div>
+              <span id="reportProfitLabel">报告口径年度净利润</span>
+              <strong id="reportProfit">¥0.00 万</strong>
+            </div>
+            <div class="ebitda">
+              <span id="reportEbitdaHeroLabel">报告口径年度EBITDA（息税折旧摊销前利润）</span>
+              <strong id="reportEbitdaHero">0.00 万</strong>
+            </div>
+          </div>
           <p id="reportStatus">当前为基础测算口径。</p>
         </div>
       </div>
@@ -1482,10 +1558,11 @@
       <div class="report-grid">
         <section class="report-card">
           <h3>经营概览</h3>
-          <div class="report-metric"><span>年度测算收入</span><strong id="reportRevenue">0.00 万</strong></div>
-          <div class="report-metric"><span>年度成本合计</span><strong id="reportCost">0.00 万</strong></div>
-          <div class="report-metric"><span>年度税费合计</span><strong id="reportTax">0.00 万</strong></div>
-          <div class="report-metric"><span>年度油品销量</span><strong id="reportVolume">0.00 吨</strong></div>
+          <div class="report-metric"><span id="reportRevenueLabel">年度测算收入</span><strong id="reportRevenue">0.00 万</strong></div>
+          <div class="report-metric"><span id="reportCostLabel">年度成本合计</span><strong id="reportCost">0.00 万</strong></div>
+          <div class="report-metric"><span id="reportTaxLabel">年度税费合计</span><strong id="reportTax">0.00 万</strong></div>
+          <div class="report-metric"><span id="reportEbitdaLabel">EBITDA（息税折旧摊销前利润）</span><strong id="reportEbitda">0.00 万</strong></div>
+          <div class="report-metric"><span id="reportVolumeLabel">年度油品销量</span><strong id="reportVolume">0.00 吨</strong></div>
         </section>
 
         <section class="report-card">
@@ -1504,6 +1581,18 @@
             <span>税费占测算收入</span>
             <strong id="reportTaxRate">0.00%</strong>
             <div class="meter"><i id="taxRateMeter"></i></div>
+          </div>
+          <div class="report-metric">
+            <span>汽油费用（吨油 / 升油）</span>
+            <strong id="reportGasExpensePerTon">0 元/吨 / 0.00 元/升</strong>
+          </div>
+          <div class="report-metric">
+            <span>柴油费用（吨油 / 升油）</span>
+            <strong id="reportDieselExpensePerTon">0 元/吨 / 0.00 元/升</strong>
+          </div>
+          <div class="report-metric">
+            <span>共同费用分摊系数</span>
+            <strong id="reportCostSplitRatio">汽油:柴油 = 3:1</strong>
           </div>
         </section>
 
@@ -1526,10 +1615,10 @@
           <h3>报告分享预览</h3>
           <div class="share-card">
             <h3>加油站利润测算报告</h3>
-            <div class="share-row"><span>年度测算收入</span><strong id="reportShareRevenue">¥0.00 万</strong></div>
-            <div class="share-row"><span>年度成本合计</span><strong id="reportShareCost">¥0.00 万</strong></div>
-            <div class="share-row"><span>年度税费合计</span><strong id="reportShareTax">¥0.00 万</strong></div>
-            <div class="share-row"><span>年度净利润</span><strong id="reportShareProfit">¥0.00 万</strong></div>
+            <div class="share-row"><span id="reportShareRevenueLabel">年度测算收入</span><strong id="reportShareRevenue">¥0.00 万</strong></div>
+            <div class="share-row"><span id="reportShareCostLabel">年度成本合计</span><strong id="reportShareCost">¥0.00 万</strong></div>
+            <div class="share-row"><span id="reportShareTaxLabel">年度税费合计</span><strong id="reportShareTax">¥0.00 万</strong></div>
+            <div class="share-row"><span id="reportShareProfitLabel">年度净利润</span><strong id="reportShareProfit">¥0.00 万</strong></div>
             <div class="share-row"><span>92# / 95# / 柴油销量</span><strong id="reportShareVolumes">0 / 0 / 0 升/天</strong></div>
             <div class="qr-placeholder">
               <img class="qr-image" src="assets/jyzmt-qrcode.jpg" alt="加油站漫谈公众号二维码">
@@ -1664,6 +1753,12 @@
                 <code>印花税 = 油品不含税销售收入 × 0.03%</code>
                 <code>企业所得税 = max(应纳税所得额, 0) × 所得税测算率</code>
                 <code>年度净利润 = 利润测算收入合计 - 成本合计 - 税费合计</code>
+                <code>月度结果 = 年度结果 ÷ 12</code>
+                <code>EBITDA（息税折旧摊销前利润）= 净利润 + 企业所得税 + 贷款利息 + 资产折旧</code>
+                <code>共同费用分摊权重 = 对应油品销量升数 × 用户填写的分摊系数</code>
+                <code>对应油品分摊费用 = 共同费用 × 对应油品分摊权重 ÷ 汽柴油分摊权重合计</code>
+                <code>升油费用 = 对应油品分摊费用 ÷ 对应年销量升数</code>
+                <code>吨油费用 = 对应油品分摊费用 ÷ 对应年销量吨数</code>
                 小型微利企业优惠仅为可选测算口径，是否适用以企业实际条件和主管税务机关口径为准。
               </div>
             </div>
@@ -1693,7 +1788,8 @@
 
     <div class="mobile-actions">
       <button class="btn secondary" type="button" id="mobileSampleBtn">填入示例</button>
-      <button class="btn" type="button" id="scrollResultBtn">开始计算</button>
+      <button class="btn" type="button" id="mobileCalcMonthBtn">按月度计算</button>
+      <button class="btn" type="button" id="mobileCalcYearBtn">按年度计算</button>
     </div>
 
     <div class="modal-backdrop" id="reviewModal" aria-hidden="true">
@@ -1740,7 +1836,7 @@
       "purchase92", "sale92", "purchase95", "sale95", "purchaseDiesel", "saleDiesel",
       "employeeCount", "avgSalary", "salaryTotal", "opsCost", "giftCost",
       "licenseCost", "adminCost", "landRent", "depreciation", "loanAmount", "interestRate",
-      "cardShare", "cardRate", "insuranceCost", "propertyTax", "landUseTax",
+      "cardShare", "cardRate", "gasCostWeight", "dieselCostWeight", "insuranceCost", "propertyTax", "landUseTax",
     ];
 
     let marginUnit = "ton";
@@ -1748,6 +1844,7 @@
     let lastResult = null;
     let pendingReviewedResult = null;
     let pendingImageAction = null;
+    let activeDisplayScale = 1;
 
     function n(id) {
       const value = parseFloat($(id).value);
@@ -1939,6 +2036,7 @@
       if (totalDaily <= 0) blockers.push("销量数据未填写：至少需要填写一个油品的日均销量。");
       if (n("cardShare") > 100) blockers.push("刷卡/支付占比不能超过 100%，请修改后再计算。");
       if (n("cardShare") < 0 || n("cardRate") < 0) blockers.push("刷卡/支付占比和手续费率不能填写为负数。");
+      if (n("gasCostWeight") <= 0 || n("dieselCostWeight") <= 0) blockers.push("汽油、柴油共同费用分摊系数必须大于 0。");
 
       if ($("customPrice").checked) {
         rows.forEach((item) => {
@@ -1977,13 +2075,36 @@
     }
 
     function line(label, value, total = false) {
-      if (!total && Math.abs(value) < 0.005) return "";
-      return `<div class="line-item${total ? " total" : ""}"><span>${label}</span><strong>${moneyWan(value)}</strong></div>`;
+      const display = value * activeDisplayScale;
+      if (!total && Math.abs(display) < 0.005) return "";
+      return `<div class="line-item${total ? " total" : ""}"><span>${label}</span><strong>${moneyWan(display)}</strong></div>`;
     }
 
     function percent(value) {
       if (!Number.isFinite(value)) return "0.00%";
       return `${value.toFixed(2)}%`;
+    }
+
+    function periodMeta(periodKey = "year") {
+      return periodKey === "month"
+        ? { periodKey: "month", periodName: "月度", periodScale: 1 / 12 }
+        : { periodKey: "year", periodName: "年度", periodScale: 1 };
+    }
+
+    function applyPeriod(result, periodKey) {
+      return Object.assign(result, periodMeta(periodKey));
+    }
+
+    function displayValue(result, value) {
+      return value * (result.periodScale || 1);
+    }
+
+    function periodMoneyWan(result, value) {
+      return moneyWan(displayValue(result, value));
+    }
+
+    function periodPlainWan(result, value) {
+      return plainWan(displayValue(result, value));
     }
 
     function setMeter(id, value) {
@@ -2004,6 +2125,35 @@
       const taxRate = result.taxes.total / revenueBase * 100;
       const fuelGrossMargin = result.revenue.fuel - result.costs.purchaseCost;
       const fuelMarginRate = fuelGrossMargin / Math.max(result.revenue.fuel, 1) * 100;
+      const gasolineRevenue = result.revenue.r92 + result.revenue.r95;
+      const dieselRevenue = result.revenue.rd;
+      const gasolinePurchaseCost = result.tons.t92 * result.prices.net.p92 + result.tons.t95 * result.prices.net.p95;
+      const dieselPurchaseCost = result.tons.td * result.prices.net.pd;
+      const gasolineGrossMargin = gasolineRevenue - gasolinePurchaseCost;
+      const dieselGrossMargin = dieselRevenue - dieselPurchaseCost;
+      const gasolineMarginRate = gasolineGrossMargin / Math.max(gasolineRevenue, 1) * 100;
+      const dieselMarginRate = dieselGrossMargin / Math.max(dieselRevenue, 1) * 100;
+      const ebitda = result.profit + result.taxes.corpTax + result.costs.loanInterest + result.costs.depreciation;
+      const expenseBase = Math.max(0, result.costs.total - result.costs.purchaseCost);
+      const gasolineLiters = (n("vol92") + n("vol95")) * DAYS;
+      const dieselLiters = n("volDiesel") * DAYS;
+      const totalLiters = gasolineLiters + dieselLiters;
+      const gasolineTons = result.tons.t92 + result.tons.t95;
+      const dieselTons = result.tons.td;
+      const gasolineWeightFactor = Math.max(n("gasCostWeight"), 0);
+      const dieselWeightFactor = Math.max(n("dieselCostWeight"), 0);
+      const gasolineWeightedLiters = gasolineLiters * gasolineWeightFactor;
+      const dieselWeightedLiters = dieselLiters * dieselWeightFactor;
+      const totalWeightedLiters = gasolineWeightedLiters + dieselWeightedLiters;
+      const gasolineSplit = totalWeightedLiters > 0 ? gasolineWeightedLiters / totalWeightedLiters : 0;
+      const dieselSplit = totalWeightedLiters > 0 ? dieselWeightedLiters / totalWeightedLiters : 0;
+      const splitRatioLabel = `汽油:柴油 = ${gasolineWeightFactor || 0}:${dieselWeightFactor || 0}`;
+      const gasolineExpense = expenseBase * gasolineSplit;
+      const dieselExpense = expenseBase * dieselSplit;
+      const gasolineExpensePerTon = gasolineTons > 0 ? gasolineExpense / gasolineTons : 0;
+      const dieselExpensePerTon = dieselTons > 0 ? dieselExpense / dieselTons : 0;
+      const gasolineExpensePerLiter = gasolineLiters > 0 ? gasolineExpense / gasolineLiters : 0;
+      const dieselExpensePerLiter = dieselLiters > 0 ? dieselExpense / dieselLiters : 0;
       const actions = [];
 
       if (profitRate < 5) {
@@ -2022,31 +2172,48 @@
         actions.push(["税费口径清晰", "当前税费为正向测算，可继续核对城建税所在地和所得税优惠条件。"]);
       }
 
-      return { totalTons, profitRate, costRate, taxRate, fuelGrossMargin, fuelMarginRate, actions };
+      return { totalTons, profitRate, costRate, fuelGrossMargin, fuelMarginRate, gasolineMarginRate, dieselMarginRate, taxRate, ebitda, gasolineTons, dieselTons, gasolineExpensePerTon, dieselExpensePerTon, gasolineExpensePerLiter, dieselExpensePerLiter, splitRatioLabel, actions };
     }
 
     function renderReport(result) {
       const context = getReportContext(result);
       const taxModeLabel = $("incomeTaxMode").value === "small" ? "小型微利企业优惠测算" : "一般企业 25% 测算";
 
-      $("reportProfit").textContent = moneyWan(result.profit);
-      $("reportStatus").textContent = `当前口径：${taxModeLabel}；结果仅作经营测算。`;
-      $("reportRevenue").textContent = plainWan(result.revenue.total);
-      $("reportCost").textContent = plainWan(result.costs.total);
-      $("reportTax").textContent = plainWan(result.taxes.total);
-      $("reportVolume").textContent = `${context.totalTons.toFixed(2)} 吨`;
+      activeDisplayScale = result.periodScale || 1;
+      $("reportProfitLabel").textContent = `报告口径${result.periodName}净利润`;
+      $("reportEbitdaHeroLabel").textContent = `报告口径${result.periodName}EBITDA（息税折旧摊销前利润）`;
+      $("reportRevenueLabel").textContent = `${result.periodName}测算收入`;
+      $("reportCostLabel").textContent = `${result.periodName}成本合计`;
+      $("reportShareRevenueLabel").textContent = `${result.periodName}测算收入`;
+      $("reportShareCostLabel").textContent = `${result.periodName}成本合计`;
+      $("reportShareTaxLabel").textContent = `${result.periodName}税费合计`;
+      $("reportShareProfitLabel").textContent = `${result.periodName}净利润`;
+      $("reportProfit").textContent = periodMoneyWan(result, result.profit);
+      $("reportEbitdaHero").textContent = periodPlainWan(result, context.ebitda);
+      $("reportStatus").textContent = `当前口径：${taxModeLabel}；${result.periodName}展示结果仅作经营测算。`;
+      $("reportRevenue").textContent = periodPlainWan(result, result.revenue.total);
+      $("reportCost").textContent = periodPlainWan(result, result.costs.total);
+      $("reportTaxLabel").textContent = `${result.periodName}税费合计`;
+      $("reportTax").textContent = periodPlainWan(result, result.taxes.total);
+      $("reportEbitda").textContent = periodPlainWan(result, context.ebitda);
+      $("reportVolumeLabel").textContent = `${result.periodName}油品销量`;
+      $("reportVolume").textContent = `${displayValue(result, context.totalTons).toFixed(2)} 吨`;
       $("reportProfitRate").textContent = percent(context.profitRate);
       $("reportCostRate").textContent = percent(context.costRate);
       $("reportTaxRate").textContent = percent(context.taxRate);
+      $("reportGasExpensePerTon").textContent = `${context.gasolineExpensePerTon.toFixed(0)} 元/吨 / ${context.gasolineExpensePerLiter.toFixed(2)} 元/升`;
+      $("reportDieselExpensePerTon").textContent = `${context.dieselExpensePerTon.toFixed(0)} 元/吨 / ${context.dieselExpensePerLiter.toFixed(2)} 元/升`;
+      $("reportCostSplitRatio").textContent = context.splitRatioLabel;
       setMeter("profitRateMeter", context.profitRate * 4);
       setMeter("costRateMeter", context.costRate);
       setMeter("taxRateMeter", context.taxRate * 3);
 
       $("reportFuelMix").innerHTML = [
-        line("92# 年销量", result.tons.t92 * 10000),
-        line("95# 年销量", result.tons.t95 * 10000),
-        line("柴油年销量", result.tons.td * 10000),
-        `<div class="line-item total"><span>油品毛利率</span><strong>${percent(context.fuelMarginRate)}</strong></div>`,
+        line(`92# ${result.periodName}销量`, result.tons.t92 * 10000),
+        line(`95# ${result.periodName}销量`, result.tons.t95 * 10000),
+        line(`柴油${result.periodName}销量`, result.tons.td * 10000),
+        `<div class="line-item total"><span>汽油${result.periodName}销量 / 毛利率</span><strong>${displayValue(result, context.gasolineTons).toFixed(2)} 吨 / ${percent(context.gasolineMarginRate)}</strong></div>`,
+        `<div class="line-item total"><span>柴油${result.periodName}销量 / 毛利率</span><strong>${displayValue(result, context.dieselTons).toFixed(2)} 吨 / ${percent(context.dieselMarginRate)}</strong></div>`,
       ].join("").replaceAll("¥", "").replaceAll(" 万", " 吨");
 
       $("reportCostMix").innerHTML = [
@@ -2062,15 +2229,15 @@
 
       $("reportActions").innerHTML = context.actions.map((item, idx) => reportAction(idx + 1, item[0], item[1])).join("");
 
-      $("reportShareRevenue").textContent = moneyWan(result.revenue.total);
-      $("reportShareCost").textContent = moneyWan(result.costs.total);
-      $("reportShareTax").textContent = moneyWan(result.taxes.total);
-      $("reportShareProfit").textContent = moneyWan(result.profit);
+      $("reportShareRevenue").textContent = periodMoneyWan(result, result.revenue.total);
+      $("reportShareCost").textContent = periodMoneyWan(result, result.costs.total);
+      $("reportShareTax").textContent = periodMoneyWan(result, result.taxes.total);
+      $("reportShareProfit").textContent = periodMoneyWan(result, result.profit);
       $("reportShareVolumes").textContent = `${n("vol92").toLocaleString("zh-CN")} / ${n("vol95").toLocaleString("zh-CN")} / ${n("volDiesel").toLocaleString("zh-CN")} 升/天`;
       $("reportShareTime").textContent = `测算时间：${result.time.toLocaleDateString("zh-CN")}`;
     }
 
-    function renderEmptyResult(message = "填写完成后点击“开始计算”，系统会先检查漏填项和异常数据。") {
+    function renderEmptyResult(message = "填写完成后点击“按月度计算”或“按年度计算”，系统会先检查漏填项和异常数据。") {
       $("profitValue").textContent = "待计算";
       $("profitValue").classList.remove("loss");
       $("profitSub").textContent = message;
@@ -2081,26 +2248,33 @@
       $("shareCost").textContent = "¥0.00 万";
       $("shareTax").textContent = "¥0.00 万";
       $("shareProfit").textContent = "¥0.00 万";
+      $("heroNetProfit").textContent = "0.00 万";
+      $("heroEbitdaProfit").textContent = "0.00 万";
       $("shareVol92").textContent = "0 升/天";
       $("shareVol95").textContent = "0 升/天";
       $("shareVolDiesel").textContent = "0 升/天";
       $("shareTime").textContent = "测算时间：-";
-      $("revenueList").innerHTML = `<p class="muted small">点击“开始计算”后展示收入明细。</p>`;
-      $("costList").innerHTML = `<p class="muted small">点击“开始计算”后展示成本明细。</p>`;
-      $("taxList").innerHTML = `<p class="muted small">点击“开始计算”后展示税费明细。</p>`;
+      $("revenueList").innerHTML = `<p class="muted small">点击“按月度计算”或“按年度计算”后展示收入明细。</p>`;
+      $("costList").innerHTML = `<p class="muted small">点击“按月度计算”或“按年度计算”后展示成本明细。</p>`;
+      $("taxList").innerHTML = `<p class="muted small">点击“按月度计算”或“按年度计算”后展示税费明细。</p>`;
       const warningBox = $("warningBox");
       warningBox.textContent = message;
       warningBox.classList.toggle("active", Boolean(message));
 
       $("reportProfit").textContent = "待计算";
-      $("reportStatus").textContent = "请先在利润计算器页点击“开始计算”。";
+      $("reportEbitdaHero").textContent = "0.00 万";
+      $("reportStatus").textContent = "请先在利润计算器页点击“按月度计算”或“按年度计算”。";
       $("reportRevenue").textContent = "0.00 万";
       $("reportCost").textContent = "0.00 万";
       $("reportTax").textContent = "0.00 万";
+      $("reportEbitda").textContent = "0.00 万";
       $("reportVolume").textContent = "0.00 吨";
       $("reportProfitRate").textContent = "0.00%";
       $("reportCostRate").textContent = "0.00%";
       $("reportTaxRate").textContent = "0.00%";
+      $("reportGasExpensePerTon").textContent = "0 元/吨 / 0.00 元/升";
+      $("reportDieselExpensePerTon").textContent = "0 元/吨 / 0.00 元/升";
+      $("reportCostSplitRatio").textContent = "汽油:柴油 = 3:1";
       setMeter("profitRateMeter", 0);
       setMeter("costRateMeter", 0);
       setMeter("taxRateMeter", 0);
@@ -2113,7 +2287,23 @@
       $("reportShareProfit").textContent = "¥0.00 万";
       $("reportShareVolumes").textContent = "0 / 0 / 0 升/天";
       $("reportShareTime").textContent = "测算时间：-";
-      $("scrollResultBtn").textContent = "开始计算";
+      $("profitLabel").textContent = "年度净利润";
+      $("heroNetProfitLabel").textContent = "年度净利润";
+      $("heroEbitdaProfitLabel").textContent = "年度EBITDA（息税折旧摊销前利润）";
+      $("shareRevenueLabel").textContent = "年度测算收入";
+      $("shareCostLabel").textContent = "年度成本合计";
+      $("shareTaxLabel").textContent = "年度税费合计";
+      $("shareProfitLabel").textContent = "年度净利润";
+      $("reportProfitLabel").textContent = "报告口径年度净利润";
+      $("reportEbitdaHeroLabel").textContent = "报告口径年度EBITDA（息税折旧摊销前利润）";
+      $("reportRevenueLabel").textContent = "年度测算收入";
+      $("reportCostLabel").textContent = "年度成本合计";
+      $("reportShareRevenueLabel").textContent = "年度测算收入";
+      $("reportShareCostLabel").textContent = "年度成本合计";
+      $("reportShareTaxLabel").textContent = "年度税费合计";
+      $("reportShareProfitLabel").textContent = "年度净利润";
+      $("reportTaxLabel").textContent = "年度税费合计";
+      $("reportVolumeLabel").textContent = "年度油品销量";
       $("reportEntryBtn").classList.remove("active");
     }
 
@@ -2123,18 +2313,28 @@
         return;
       }
       lastResult = result;
-      $("profitValue").textContent = moneyWan(result.profit);
-      $("scrollResultBtn").textContent = "看结果";
+      activeDisplayScale = result.periodScale || 1;
+      const context = getReportContext(result);
+      $("profitLabel").textContent = `${result.periodName}净利润`;
+      $("heroNetProfitLabel").textContent = `${result.periodName}净利润`;
+      $("heroEbitdaProfitLabel").textContent = `${result.periodName}EBITDA（息税折旧摊销前利润）`;
+      $("shareRevenueLabel").textContent = `${result.periodName}测算收入`;
+      $("shareCostLabel").textContent = `${result.periodName}成本合计`;
+      $("shareTaxLabel").textContent = `${result.periodName}税费合计`;
+      $("shareProfitLabel").textContent = `${result.periodName}净利润`;
+      $("profitValue").textContent = periodMoneyWan(result, result.profit);
+      $("heroNetProfit").textContent = periodPlainWan(result, result.profit);
+      $("heroEbitdaProfit").textContent = periodPlainWan(result, context.ebitda);
       $("reportEntryBtn").classList.add("active");
       $("profitValue").classList.toggle("loss", result.profit < 0);
-      $("profitSub").textContent = `测算时间：${result.time.toLocaleString("zh-CN", { hour12: false })}`;
-      $("kpiRevenue").textContent = plainWan(result.revenue.total);
-      $("kpiCost").textContent = plainWan(result.costs.total);
-      $("kpiTax").textContent = plainWan(result.taxes.total);
-      $("shareRevenue").textContent = moneyWan(result.revenue.total);
-      $("shareCost").textContent = moneyWan(result.costs.total);
-      $("shareTax").textContent = moneyWan(result.taxes.total);
-      $("shareProfit").textContent = moneyWan(result.profit);
+      $("profitSub").textContent = `${result.periodName}口径 · 测算时间：${result.time.toLocaleString("zh-CN", { hour12: false })}`;
+      $("kpiRevenue").textContent = periodPlainWan(result, result.revenue.total);
+      $("kpiCost").textContent = periodPlainWan(result, result.costs.total);
+      $("kpiTax").textContent = periodPlainWan(result, result.taxes.total);
+      $("shareRevenue").textContent = periodMoneyWan(result, result.revenue.total);
+      $("shareCost").textContent = periodMoneyWan(result, result.costs.total);
+      $("shareTax").textContent = periodMoneyWan(result, result.taxes.total);
+      $("shareProfit").textContent = periodMoneyWan(result, result.profit);
       $("shareVol92").textContent = `${n("vol92").toLocaleString("zh-CN")} 升/天`;
       $("shareVol95").textContent = `${n("vol95").toLocaleString("zh-CN")} 升/天`;
       $("shareVolDiesel").textContent = `${n("volDiesel").toLocaleString("zh-CN")} 升/天`;
@@ -2199,9 +2399,9 @@
       } else {
         $("reviewSummary").style.display = "block";
         $("reviewSummary").innerHTML = [
-          `年度测算收入：<strong>${moneyWan(result.revenue.total)}</strong>`,
-          `年度成本合计：<strong>${moneyWan(result.costs.total)}</strong>`,
-          `年度净利润：<strong>${moneyWan(result.profit)}</strong>`,
+          `${result.periodName}测算收入：<strong>${periodMoneyWan(result, result.revenue.total)}</strong>`,
+          `${result.periodName}成本合计：<strong>${periodMoneyWan(result, result.costs.total)}</strong>`,
+          `${result.periodName}净利润：<strong>${periodMoneyWan(result, result.profit)}</strong>`,
         ].join("<br>");
         $("reviewList").innerHTML = [
           ...review.blockers.map((item) => `<div class="review-item blocking">${item}</div>`),
@@ -2226,8 +2426,8 @@
       $("reviewModal").setAttribute("aria-hidden", "true");
     }
 
-    function startCalculation() {
-      const result = calculate();
+    function startCalculation(periodKey = "year") {
+      const result = applyPeriod(calculate(), periodKey);
       const review = getReviewIssues(result);
       openReviewModal(result, review);
     }
@@ -2251,7 +2451,7 @@
     function markInputsDirty() {
       if (!lastResult) return;
       lastResult = null;
-      renderEmptyResult("数据已修改，请重新点击“开始计算”并确认后生成新结果。");
+      renderEmptyResult("数据已修改，请重新点击“按月度计算”或“按年度计算”并确认后生成新结果。");
     }
 
     function setSample() {
@@ -2262,7 +2462,8 @@
         licenseCost: 8000, adminCost: 0,
         landRent: 120000, depreciation: 80000,
         loanAmount: 1000000, interestRate: 5,
-        cardShare: 100, cardRate: 0.3,
+        cardShare: 100, cardRate: 3,
+        gasCostWeight: 3, dieselCostWeight: 1,
         insuranceCost: 20000, propertyTax: 0, landUseTax: 10000,
       };
       Object.entries(sample).forEach(([id, value]) => { $(id).value = value; });
@@ -2270,7 +2471,7 @@
       $("hasLicense").checked = true;
       $("landRentVatRate").value = "0";
       lastResult = null;
-      renderEmptyResult("示例数据已填入，点击“开始计算”查看测算结果。");
+      renderEmptyResult("示例数据已填入，点击“按月度计算”或“按年度计算”查看测算结果。");
     }
 
     function resetAll() {
@@ -2286,7 +2487,9 @@
       $("purchaseDiesel").value = 6500;
       $("saleDiesel").value = 6857;
       $("cardShare").value = 100;
-      $("cardRate").value = 0.3;
+      $("cardRate").value = 3;
+      $("gasCostWeight").value = 3;
+      $("dieselCostWeight").value = 1;
       $("landRentVatRate").value = "0";
       $("hasSocial").checked = true;
       $("hasLicense").checked = true;
@@ -2294,7 +2497,7 @@
       $("customPrice").checked = false;
       syncPanels();
       lastResult = null;
-      renderEmptyResult("已清空输入，请填写数据后点击“开始计算”。");
+      renderEmptyResult("已清空输入，请填写数据后点击“按月度计算”或“按年度计算”。");
     }
 
     function syncPanels() {
@@ -2525,17 +2728,17 @@
       canvasText(ctx, "加油站利润测算（合规经营）", 120, 160, 820);
       ctx.font = "400 26px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
       ctx.fillStyle = "rgba(255,255,255,.78)";
-      canvasText(ctx, "年度利润 · 成本 · 税费概要", 120, 210, 820);
+      canvasText(ctx, `${result.periodName}利润 · 成本 · 税费概要`, 120, 210, 820);
       ctx.fillStyle = cyan;
       drawRoundRect(ctx, 120, 240, 150, 12, 6);
       ctx.fill();
 
       ctx.fillStyle = muted;
       ctx.font = "500 28px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
-      canvasText(ctx, "年度净利润", 120, 395, 300);
+      canvasText(ctx, `${result.periodName}净利润`, 120, 395, 300);
       ctx.fillStyle = result.profit < 0 ? "#c64646" : blue;
       ctx.font = "850 72px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
-      canvasText(ctx, moneyWan(result.profit), 120, 485, 820);
+      canvasText(ctx, periodMoneyWan(result, result.profit), 120, 485, 820);
       if (stationName) {
         ctx.fillStyle = ink;
         ctx.font = "750 32px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
@@ -2543,10 +2746,10 @@
       }
 
       const rows = [
-        ["年度测算收入", moneyWan(result.revenue.total)],
-        ["年度成本合计", moneyWan(result.costs.total)],
-        ["年度税费合计", moneyWan(result.taxes.total)],
-        ["增值税应纳税额", moneyWan(result.taxes.vatPayable)],
+        [`${result.periodName}测算收入`, periodMoneyWan(result, result.revenue.total)],
+        [`${result.periodName}成本合计`, periodMoneyWan(result, result.costs.total)],
+        [`${result.periodName}税费合计`, periodMoneyWan(result, result.taxes.total)],
+        [`${result.periodName}增值税应纳税额`, periodMoneyWan(result, result.taxes.vatPayable)],
         ["92# 日均销量", `${n("vol92").toLocaleString("zh-CN")} 升/天`],
         ["95# 日均销量", `${n("vol95").toLocaleString("zh-CN")} 升/天`],
         ["柴油日均销量", `${n("volDiesel").toLocaleString("zh-CN")} 升/天`],
@@ -2681,7 +2884,7 @@
       const context = getReportContext(result);
       const canvas = document.createElement("canvas");
       canvas.width = 1080;
-      canvas.height = 2860;
+      canvas.height = 3060;
       const ctx = canvas.getContext("2d");
       const blue = "#004b8d";
       const midBlue = "#0067b1";
@@ -2689,14 +2892,14 @@
       const ink = "#0b1f33";
       const muted = "#657789";
 
-      const bg = ctx.createLinearGradient(0, 0, 1080, 2860);
+      const bg = ctx.createLinearGradient(0, 0, 1080, 3060);
       bg.addColorStop(0, "#f6fbff");
       bg.addColorStop(0.55, "#edf7fd");
       bg.addColorStop(1, "#ffffff");
       ctx.fillStyle = bg;
-      ctx.fillRect(0, 0, 1080, 2860);
+      ctx.fillRect(0, 0, 1080, 3060);
 
-      drawRoundRect(ctx, 60, 60, 960, 2740, 34);
+      drawRoundRect(ctx, 60, 60, 960, 2940, 34);
       ctx.fillStyle = "#ffffff";
       ctx.shadowColor = "rgba(11, 45, 78, .14)";
       ctx.shadowBlur = 34;
@@ -2724,18 +2927,23 @@
 
       let y = 430;
       y = drawReportSectionTitle(ctx, "一、经营概览", 110, y);
-      y = drawReportRow(ctx, "年度测算收入", moneyWan(result.revenue.total), 110, y, 860);
-      y = drawReportRow(ctx, "年度成本合计", moneyWan(result.costs.total), 110, y, 860);
-      y = drawReportRow(ctx, "年度税费合计", moneyWan(result.taxes.total), 110, y, 860);
-      y = drawReportRow(ctx, "年度净利润", moneyWan(result.profit), 110, y, 860);
-      y = drawReportRow(ctx, "年度油品销量", `${context.totalTons.toFixed(2)} 吨`, 110, y, 860);
+      y = drawReportRow(ctx, `${result.periodName}测算收入`, periodMoneyWan(result, result.revenue.total), 110, y, 860);
+      y = drawReportRow(ctx, `${result.periodName}成本合计`, periodMoneyWan(result, result.costs.total), 110, y, 860);
+      y = drawReportRow(ctx, `${result.periodName}税费合计`, periodMoneyWan(result, result.taxes.total), 110, y, 860);
+      y = drawReportRow(ctx, `${result.periodName}净利润`, periodMoneyWan(result, result.profit), 110, y, 860);
+      y = drawReportRow(ctx, "EBITDA（息税折旧摊销前利润）", periodMoneyWan(result, context.ebitda), 110, y, 860);
+      y = drawReportRow(ctx, `${result.periodName}油品销量`, `${displayValue(result, context.totalTons).toFixed(2)} 吨`, 110, y, 860);
 
       y += 28;
       y = drawReportSectionTitle(ctx, "二、压力指标", 110, y);
       y = drawReportRow(ctx, "净利率", percent(context.profitRate), 110, y, 860);
       y = drawReportRow(ctx, "成本占测算收入", percent(context.costRate), 110, y, 860);
       y = drawReportRow(ctx, "税费占测算收入", percent(context.taxRate), 110, y, 860);
-      y = drawReportRow(ctx, "油品毛利率", percent(context.fuelMarginRate), 110, y, 860);
+      y = drawReportRow(ctx, "汽油销量 / 毛利率", `${displayValue(result, context.gasolineTons).toFixed(2)} 吨 / ${percent(context.gasolineMarginRate)}`, 110, y, 860);
+      y = drawReportRow(ctx, "柴油销量 / 毛利率", `${displayValue(result, context.dieselTons).toFixed(2)} 吨 / ${percent(context.dieselMarginRate)}`, 110, y, 860);
+      y = drawReportRow(ctx, "汽油费用（吨油 / 升油）", `${context.gasolineExpensePerTon.toFixed(0)} 元/吨 / ${context.gasolineExpensePerLiter.toFixed(2)} 元/升`, 110, y, 860);
+      y = drawReportRow(ctx, "柴油费用（吨油 / 升油）", `${context.dieselExpensePerTon.toFixed(0)} 元/吨 / ${context.dieselExpensePerLiter.toFixed(2)} 元/升`, 110, y, 860);
+      y = drawReportRow(ctx, "共同费用分摊系数", context.splitRatioLabel, 110, y, 860);
 
       y += 28;
       y = drawReportSectionTitle(ctx, "三、油品结构", 110, y);
@@ -2755,10 +2963,10 @@
 
       y += 28;
       y = drawReportSectionTitle(ctx, "五、税费摘要", 110, y);
-      y = drawReportRow(ctx, "增值税应纳税额", moneyWan(result.taxes.vatPayable), 110, y, 860);
-      y = drawReportRow(ctx, "城建税及附加", moneyWan(result.taxes.cityTax + result.taxes.edu + result.taxes.localEdu), 110, y, 860);
-      y = drawReportRow(ctx, "印花税", moneyWan(result.taxes.stamp), 110, y, 860);
-      y = drawReportRow(ctx, "企业所得税", moneyWan(result.taxes.corpTax), 110, y, 860);
+      y = drawReportRow(ctx, "增值税应纳税额", periodMoneyWan(result, result.taxes.vatPayable), 110, y, 860);
+      y = drawReportRow(ctx, "城建税及附加", periodMoneyWan(result, result.taxes.cityTax + result.taxes.edu + result.taxes.localEdu), 110, y, 860);
+      y = drawReportRow(ctx, "印花税", periodMoneyWan(result, result.taxes.stamp), 110, y, 860);
+      y = drawReportRow(ctx, "企业所得税", periodMoneyWan(result, result.taxes.corpTax), 110, y, 860);
 
       y += 28;
       y = drawReportSectionTitle(ctx, "六、报告提示", 110, y);
@@ -2981,10 +3189,13 @@
     $("customPrice").addEventListener("change", () => { syncPanels(); markInputsDirty(); });
     document.querySelectorAll("[data-margin-unit]").forEach((btn) => btn.addEventListener("click", () => updateMarginUnit(btn.dataset.marginUnit)));
     document.querySelectorAll("[data-wage-mode]").forEach((btn) => btn.addEventListener("click", () => setWageMode(btn.dataset.wageMode)));
-    $("startCalcBtn").addEventListener("click", startCalculation);
+    $("startCalcMonthBtn").addEventListener("click", () => startCalculation("month"));
+    $("startCalcYearBtn").addEventListener("click", () => startCalculation("year"));
     $("reportEntryBtn").addEventListener("click", () => switchPage("reportPage"));
     $("sampleBtn").addEventListener("click", setSample);
     $("mobileSampleBtn").addEventListener("click", setSample);
+    $("mobileCalcMonthBtn").addEventListener("click", () => startCalculation("month"));
+    $("mobileCalcYearBtn").addEventListener("click", () => startCalculation("year"));
     $("resetBtn").addEventListener("click", resetAll);
     $("saveBtn").addEventListener("click", () => openStationModal("save"));
     $("copyShareBtn").addEventListener("click", () => openStationModal("share"));
@@ -3001,14 +3212,6 @@
     $("clearHistoryBtn").addEventListener("click", () => { localStorage.removeItem("gasStationCalcHistory"); renderHistory(); });
     $("messageForm").addEventListener("submit", submitMessage);
     $("assetLeadForm").addEventListener("submit", submitAssetLead);
-    $("scrollResultBtn").addEventListener("click", () => {
-      if (!lastResult) {
-        startCalculation();
-        return;
-      }
-      switchPage("calculatorPage");
-      setTimeout(() => document.querySelector(".hero-result").scrollIntoView({ behavior: "smooth", block: "start" }), 120);
-    });
 
     syncPanels();
     render();
