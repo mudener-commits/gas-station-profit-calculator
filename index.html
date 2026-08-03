@@ -1454,9 +1454,9 @@
               <strong id="heroNetProfit">0.00 万</strong>
             </div>
             <div class="profit-compare-item ebitda">
-              <span id="heroEbitdaProfitLabel">年度EBITDA（息税折旧摊销前利润）</span>
+              <span id="heroEbitdaProfitLabel">年度净回笼资金（EBITDA-息税折旧摊销前净利润）</span>
               <strong id="heroEbitdaProfit">0.00 万</strong>
-              <small>息税折旧摊销前利润</small>
+              <small>EBITDA-息税折旧摊销前净利润</small>
             </div>
           </div>
           <div class="kpi-grid">
@@ -1547,7 +1547,7 @@
               <strong id="reportProfit">¥0.00 万</strong>
             </div>
             <div class="ebitda">
-              <span id="reportEbitdaHeroLabel">报告口径年度EBITDA（息税折旧摊销前利润）</span>
+              <span id="reportEbitdaHeroLabel">报告口径年度净回笼资金（EBITDA-息税折旧摊销前净利润）</span>
               <strong id="reportEbitdaHero">0.00 万</strong>
             </div>
           </div>
@@ -1561,7 +1561,7 @@
           <div class="report-metric"><span id="reportRevenueLabel">年度测算收入</span><strong id="reportRevenue">0.00 万</strong></div>
           <div class="report-metric"><span id="reportCostLabel">年度成本合计</span><strong id="reportCost">0.00 万</strong></div>
           <div class="report-metric"><span id="reportTaxLabel">年度税费合计</span><strong id="reportTax">0.00 万</strong></div>
-          <div class="report-metric"><span id="reportEbitdaLabel">EBITDA（息税折旧摊销前利润）</span><strong id="reportEbitda">0.00 万</strong></div>
+          <div class="report-metric"><span id="reportEbitdaLabel">净回笼资金（EBITDA-息税折旧摊销前净利润）</span><strong id="reportEbitda">0.00 万</strong></div>
           <div class="report-metric"><span id="reportVolumeLabel">年度油品销量</span><strong id="reportVolume">0.00 吨</strong></div>
         </section>
 
@@ -1754,7 +1754,7 @@
                 <code>企业所得税 = max(应纳税所得额, 0) × 所得税测算率</code>
                 <code>年度净利润 = 利润测算收入合计 - 成本合计 - 税费合计</code>
                 <code>月度结果 = 年度结果 ÷ 12</code>
-                <code>EBITDA（息税折旧摊销前利润）= 净利润 + 企业所得税 + 贷款利息 + 资产折旧</code>
+                <code>净回笼资金（EBITDA-息税折旧摊销前净利润）= 净利润 + 企业所得税 + 贷款利息 + 资产折旧</code>
                 <code>共同费用分摊权重 = 对应油品销量升数 × 用户填写的分摊系数</code>
                 <code>对应油品分摊费用 = 共同费用 × 对应油品分摊权重 ÷ 汽柴油分摊权重合计</code>
                 <code>升油费用 = 对应油品分摊费用 ÷ 对应年销量升数</code>
@@ -2181,7 +2181,7 @@
 
       activeDisplayScale = result.periodScale || 1;
       $("reportProfitLabel").textContent = `报告口径${result.periodName}净利润`;
-      $("reportEbitdaHeroLabel").textContent = `报告口径${result.periodName}EBITDA（息税折旧摊销前利润）`;
+      $("reportEbitdaHeroLabel").textContent = `报告口径${result.periodName}净回笼资金（EBITDA-息税折旧摊销前净利润）`;
       $("reportRevenueLabel").textContent = `${result.periodName}测算收入`;
       $("reportCostLabel").textContent = `${result.periodName}成本合计`;
       $("reportShareRevenueLabel").textContent = `${result.periodName}测算收入`;
@@ -2289,13 +2289,13 @@
       $("reportShareTime").textContent = "测算时间：-";
       $("profitLabel").textContent = "年度净利润";
       $("heroNetProfitLabel").textContent = "年度净利润";
-      $("heroEbitdaProfitLabel").textContent = "年度EBITDA（息税折旧摊销前利润）";
+      $("heroEbitdaProfitLabel").textContent = "年度净回笼资金（EBITDA-息税折旧摊销前净利润）";
       $("shareRevenueLabel").textContent = "年度测算收入";
       $("shareCostLabel").textContent = "年度成本合计";
       $("shareTaxLabel").textContent = "年度税费合计";
       $("shareProfitLabel").textContent = "年度净利润";
       $("reportProfitLabel").textContent = "报告口径年度净利润";
-      $("reportEbitdaHeroLabel").textContent = "报告口径年度EBITDA（息税折旧摊销前利润）";
+      $("reportEbitdaHeroLabel").textContent = "报告口径年度净回笼资金（EBITDA-息税折旧摊销前净利润）";
       $("reportRevenueLabel").textContent = "年度测算收入";
       $("reportCostLabel").textContent = "年度成本合计";
       $("reportShareRevenueLabel").textContent = "年度测算收入";
@@ -2317,7 +2317,7 @@
       const context = getReportContext(result);
       $("profitLabel").textContent = `${result.periodName}净利润`;
       $("heroNetProfitLabel").textContent = `${result.periodName}净利润`;
-      $("heroEbitdaProfitLabel").textContent = `${result.periodName}EBITDA（息税折旧摊销前利润）`;
+      $("heroEbitdaProfitLabel").textContent = `${result.periodName}净回笼资金（EBITDA-息税折旧摊销前净利润）`;
       $("shareRevenueLabel").textContent = `${result.periodName}测算收入`;
       $("shareCostLabel").textContent = `${result.periodName}成本合计`;
       $("shareTaxLabel").textContent = `${result.periodName}税费合计`;
@@ -2931,7 +2931,7 @@
       y = drawReportRow(ctx, `${result.periodName}成本合计`, periodMoneyWan(result, result.costs.total), 110, y, 860);
       y = drawReportRow(ctx, `${result.periodName}税费合计`, periodMoneyWan(result, result.taxes.total), 110, y, 860);
       y = drawReportRow(ctx, `${result.periodName}净利润`, periodMoneyWan(result, result.profit), 110, y, 860);
-      y = drawReportRow(ctx, "EBITDA（息税折旧摊销前利润）", periodMoneyWan(result, context.ebitda), 110, y, 860);
+      y = drawReportRow(ctx, "净回笼资金（EBITDA-息税折旧摊销前净利润）", periodMoneyWan(result, context.ebitda), 110, y, 860);
       y = drawReportRow(ctx, `${result.periodName}油品销量`, `${displayValue(result, context.totalTons).toFixed(2)} 吨`, 110, y, 860);
 
       y += 28;
