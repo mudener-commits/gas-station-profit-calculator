@@ -17,6 +17,9 @@
       --green-2: #004b8d;
       --amber: #00a3e0;
       --red: #c64646;
+      --rent: #d45a3a;
+      --rent-soft: #fff4ef;
+      --rent-line: #efb9a8;
       --blue: #0072bc;
       --shadow: 0 18px 42px rgba(11, 45, 78, .10);
       --radius: 8px;
@@ -547,6 +550,19 @@
       border-bottom: 0;
     }
 
+    .line-item.rent-item {
+      margin: 0 -8px;
+      padding: 8px;
+      border-bottom-color: var(--rent-line);
+      border-radius: 6px;
+      background: var(--rent-soft);
+    }
+
+    .line-item.rent-item span,
+    .line-item.rent-item strong {
+      color: var(--rent);
+    }
+
     .alert {
       display: none;
       border-radius: 8px;
@@ -811,6 +827,31 @@
     .report-metric strong {
       font-size: 22px;
       white-space: nowrap;
+    }
+
+    .report-metric.rent-metric {
+      margin: 0 -8px;
+      padding: 11px 8px;
+      border-bottom-color: var(--rent-line);
+      border-radius: 6px;
+      background: var(--rent-soft);
+    }
+
+    .report-metric.rent-metric span,
+    .report-metric.rent-metric strong {
+      color: var(--rent);
+    }
+
+    .field.rent-field {
+      padding: 10px;
+      border: 1px solid var(--rent-line);
+      border-radius: 8px;
+      background: var(--rent-soft);
+    }
+
+    .field.rent-field span {
+      color: var(--rent);
+      font-weight: 700;
     }
 
     .meter {
@@ -1389,8 +1430,8 @@
           </div>
           <div class="section-body">
             <div class="grid two">
-              <label class="field"><span>土地/油站租金 元/年</span><input id="landRent" type="number" inputmode="decimal" min="0" step="1000" value="0"></label>
-              <label class="field">
+              <label class="field rent-field"><span>土地/油站租金 元/年</span><input id="landRent" type="number" inputmode="decimal" min="0" step="1000" value="0"></label>
+              <label class="field rent-field">
                 <span>租金发票抵扣方式</span>
                 <select id="landRentVatRate">
                   <option value="0">无可抵扣专票</option>
@@ -1601,16 +1642,28 @@
             <div class="meter"><i id="taxRateMeter"></i></div>
           </div>
           <div class="report-metric">
-            <span>汽油费用（吨油 / 升油）</span>
+            <span>汽油管理费用（每吨 / 每升）</span>
             <strong id="reportGasExpensePerTon">0 元/吨 / 0.00 元/升</strong>
           </div>
+          <div class="report-metric rent-metric">
+            <span>汽油租金成本（每吨 / 每升）</span>
+            <strong id="reportGasRentPerTon">0 元/吨 / 0.00 元/升</strong>
+          </div>
           <div class="report-metric">
-            <span>柴油费用（吨油 / 升油）</span>
+            <span>柴油管理费用（每吨 / 每升）</span>
             <strong id="reportDieselExpensePerTon">0 元/吨 / 0.00 元/升</strong>
           </div>
+          <div class="report-metric rent-metric">
+            <span>柴油租金成本（每吨 / 每升）</span>
+            <strong id="reportDieselRentPerTon">0 元/吨 / 0.00 元/升</strong>
+          </div>
           <div class="report-metric advanced" id="reportLngExpenseRow">
-            <span>LNG 费用（每吨 / 每公斤）</span>
+            <span>LNG 管理费用（每吨 / 每公斤）</span>
             <strong id="reportLngExpensePerTon">0 元/吨 / 0.00 元/公斤</strong>
+          </div>
+          <div class="report-metric rent-metric advanced" id="reportLngRentRow">
+            <span>LNG 租金成本（每吨 / 每公斤）</span>
+            <strong id="reportLngRentPerTon">0 元/吨 / 0.00 元/公斤</strong>
           </div>
           <div class="report-metric">
             <span>共同费用分摊系数</span>
@@ -1696,10 +1749,10 @@
             </div>
             <div class="grid two">
               <label class="field"><span>油站所在省市</span><input id="assetRegion" type="text" placeholder="例如：山东济南"></label>
-              <label class="field"><span>需求类型</span><select id="assetDemandType"><option value="">请选择</option><option>出售</option><option>出租</option><option>整体转让</option><option>合作经营</option><option>想先了解估值</option></select></label>
+              <label class="field"><span>需求类型</span><select id="assetDemandType"><option value="">请选择</option><option>出售</option><option>出租</option><option>整体转让（转租）</option><option>合作经营</option><option>想先了解估值</option></select></label>
             </div>
             <div class="grid">
-              <label class="field"><span>油站状态</span><select id="assetStationStatus"><option value="">请选择</option><option>正常经营</option><option>停业</option><option>新建未运营</option><option>其他</option></select></label>
+              <label class="field"><span>油站状态</span><select id="assetStationStatus"><option value="">请选择</option><option>正在营业（自营）</option><option>正在营业（租赁）</option><option>新建未运营</option><option>其他</option></select></label>
               <label class="field"><span>油站类型</span><select id="assetStationType"><option value="">请选择</option><option>城区站</option><option>国省道站</option><option>乡镇站</option><option>其他</option></select></label>
               <label class="field"><span>是否有土地证</span><select id="assetLandCert"><option value="">请选择</option><option>有</option><option>没有</option><option>不确定</option><option>不方便透露</option></select></label>
             </div>
@@ -1781,11 +1834,14 @@
                 <code>年度净利润 = 利润测算收入合计 - 成本合计 - 税费合计</code>
                 <code>月度结果 = 年度结果 ÷ 12</code>
                 <code>净回笼资金（EBITDA-息税折旧摊销前净利润）= 净利润 + 企业所得税 + 贷款利息 + 资产折旧</code>
+                <code>管理费用池 = 成本合计 - 油气采购成本 - 土地/油站租金成本</code>
+                <code>租金费用池 = 价税分离后的土地/油站租金成本</code>
                 <code>共同费用分摊权重 = 对应品类销量吨数 × 用户填写的分摊系数</code>
-                <code>对应品类分摊费用 = 共同费用 × 对应品类分摊权重 ÷ 油气分摊权重合计</code>
-                <code>升油费用 = 对应油品分摊费用 ÷ 对应年销量升数</code>
-                <code>吨油费用 = 对应油品分摊费用 ÷ 对应年销量吨数</code>
-                <code>LNG 每公斤费用 = LNG 分摊费用 ÷ LNG 年销量公斤数</code>
+                <code>对应品类管理费用 = 管理费用池 × 对应品类分摊权重 ÷ 油气分摊权重合计</code>
+                <code>对应品类租金成本 = 租金费用池 × 对应品类分摊权重 ÷ 油气分摊权重合计</code>
+                <code>升油管理费用/租金成本 = 对应分摊金额 ÷ 对应年销量升数</code>
+                <code>吨油管理费用/租金成本 = 对应分摊金额 ÷ 对应年销量吨数</code>
+                <code>LNG 每公斤管理费用/租金成本 = 对应分摊金额 ÷ LNG 年销量公斤数</code>
                 默认共同费用分摊系数为汽油:柴油:LNG = 3:1:1；未勾选 LNG 时仍按汽油:柴油 = 3:1 计算。
                 小型微利企业优惠仅为可选测算口径，是否适用以企业实际条件和主管税务机关口径为准。
               </div>
@@ -2115,19 +2171,19 @@
 
       const totalTons = rows.reduce((sum, item) => sum + item.tons, 0);
       if (totalTons > 0) {
-        const managementCost = Math.max(0, result.costs.total - result.costs.purchaseCost);
+        const managementCost = Math.max(0, result.costs.total - result.costs.purchaseCost - result.costs.landRent);
         const managementPerTon = managementCost / totalTons;
-        if (managementPerTon < 100) warnings.push(`管理类成本约 ${managementPerTon.toFixed(0)} 元/吨，低于 100 元/吨，请确认人工、运营、租金、折旧、保险等费用是否漏填。`);
+        if (managementPerTon < 100) warnings.push(`管理类成本约 ${managementPerTon.toFixed(0)} 元/吨，低于 100 元/吨，请确认人工、运营、折旧、保险等费用是否漏填。土地/油站租金已单独核算。`);
         if (managementPerTon > 1000) warnings.push(`管理类成本约 ${managementPerTon.toFixed(0)} 元/吨，超过 1000 元/吨，请核对固定成本、资金成本或销量是否录入偏差。`);
       }
 
       return { blockers, warnings };
     }
 
-    function line(label, value, total = false) {
+    function line(label, value, total = false, tone = "") {
       const display = value * activeDisplayScale;
       if (!total && Math.abs(display) < 0.005) return "";
-      return `<div class="line-item${total ? " total" : ""}"><span>${label}</span><strong>${moneyWan(display)}</strong></div>`;
+      return `<div class="line-item${total ? " total" : ""}${tone ? ` ${tone}-item` : ""}"><span>${label}</span><strong>${moneyWan(display)}</strong></div>`;
     }
 
     function percent(value) {
@@ -2188,7 +2244,8 @@
       const dieselMarginRate = dieselGrossMargin / Math.max(dieselRevenue, 1) * 100;
       const lngMarginRate = result.hasLng ? lngGrossMargin / Math.max(lngRevenue, 1) * 100 : 0;
       const ebitda = result.profit + result.taxes.corpTax + result.costs.loanInterest + result.costs.depreciation;
-      const expenseBase = Math.max(0, result.costs.total - result.costs.purchaseCost);
+      const managementExpenseBase = Math.max(0, result.costs.total - result.costs.purchaseCost - result.costs.landRent);
+      const rentExpenseBase = Math.max(0, result.costs.landRent);
       const gasolineLiters = (n("vol92") + n("vol95")) * DAYS;
       const dieselLiters = n("volDiesel") * DAYS;
       const gasolineTons = result.tons.t92 + result.tons.t95;
@@ -2208,15 +2265,24 @@
       const splitRatioLabel = result.hasLng
         ? `汽油:柴油:LNG = ${gasolineWeightFactor || 0}:${dieselWeightFactor || 0}:${lngWeightFactor || 0}`
         : `汽油:柴油 = ${gasolineWeightFactor || 0}:${dieselWeightFactor || 0}`;
-      const gasolineExpense = expenseBase * gasolineSplit;
-      const dieselExpense = expenseBase * dieselSplit;
-      const lngExpense = expenseBase * lngSplit;
+      const gasolineExpense = managementExpenseBase * gasolineSplit;
+      const dieselExpense = managementExpenseBase * dieselSplit;
+      const lngExpense = managementExpenseBase * lngSplit;
+      const gasolineRent = rentExpenseBase * gasolineSplit;
+      const dieselRent = rentExpenseBase * dieselSplit;
+      const lngRent = rentExpenseBase * lngSplit;
       const gasolineExpensePerTon = gasolineTons > 0 ? gasolineExpense / gasolineTons : 0;
       const dieselExpensePerTon = dieselTons > 0 ? dieselExpense / dieselTons : 0;
       const lngExpensePerTon = lngTons > 0 ? lngExpense / lngTons : 0;
       const gasolineExpensePerLiter = gasolineLiters > 0 ? gasolineExpense / gasolineLiters : 0;
       const dieselExpensePerLiter = dieselLiters > 0 ? dieselExpense / dieselLiters : 0;
       const lngExpensePerKg = lngKg > 0 ? lngExpense / lngKg : 0;
+      const gasolineRentPerTon = gasolineTons > 0 ? gasolineRent / gasolineTons : 0;
+      const dieselRentPerTon = dieselTons > 0 ? dieselRent / dieselTons : 0;
+      const lngRentPerTon = lngTons > 0 ? lngRent / lngTons : 0;
+      const gasolineRentPerLiter = gasolineLiters > 0 ? gasolineRent / gasolineLiters : 0;
+      const dieselRentPerLiter = dieselLiters > 0 ? dieselRent / dieselLiters : 0;
+      const lngRentPerKg = lngKg > 0 ? lngRent / lngKg : 0;
       const actions = [];
 
       if (profitRate < 5) {
@@ -2235,7 +2301,7 @@
         actions.push(["税费口径清晰", "当前税费为正向测算，可继续核对城建税所在地和所得税优惠条件。"]);
       }
 
-      return { totalTons, profitRate, costRate, fuelGrossMargin, fuelMarginRate, gasolineMarginRate, dieselMarginRate, lngMarginRate, taxRate, ebitda, gasolineTons, dieselTons, lngTons, gasolineExpensePerTon, dieselExpensePerTon, lngExpensePerTon, gasolineExpensePerLiter, dieselExpensePerLiter, lngExpensePerKg, splitRatioLabel, actions };
+      return { totalTons, profitRate, costRate, fuelGrossMargin, fuelMarginRate, gasolineMarginRate, dieselMarginRate, lngMarginRate, taxRate, ebitda, gasolineTons, dieselTons, lngTons, gasolineExpensePerTon, dieselExpensePerTon, lngExpensePerTon, gasolineExpensePerLiter, dieselExpensePerLiter, lngExpensePerKg, gasolineRentPerTon, dieselRentPerTon, lngRentPerTon, gasolineRentPerLiter, dieselRentPerLiter, lngRentPerKg, splitRatioLabel, actions };
     }
 
     function renderReport(result) {
@@ -2265,9 +2331,13 @@
       $("reportCostRate").textContent = percent(context.costRate);
       $("reportTaxRate").textContent = percent(context.taxRate);
       $("reportGasExpensePerTon").textContent = `${context.gasolineExpensePerTon.toFixed(0)} 元/吨 / ${context.gasolineExpensePerLiter.toFixed(2)} 元/升`;
+      $("reportGasRentPerTon").textContent = `${context.gasolineRentPerTon.toFixed(0)} 元/吨 / ${context.gasolineRentPerLiter.toFixed(2)} 元/升`;
       $("reportDieselExpensePerTon").textContent = `${context.dieselExpensePerTon.toFixed(0)} 元/吨 / ${context.dieselExpensePerLiter.toFixed(2)} 元/升`;
+      $("reportDieselRentPerTon").textContent = `${context.dieselRentPerTon.toFixed(0)} 元/吨 / ${context.dieselRentPerLiter.toFixed(2)} 元/升`;
       $("reportLngExpensePerTon").textContent = `${context.lngExpensePerTon.toFixed(0)} 元/吨 / ${context.lngExpensePerKg.toFixed(2)} 元/公斤`;
+      $("reportLngRentPerTon").textContent = `${context.lngRentPerTon.toFixed(0)} 元/吨 / ${context.lngRentPerKg.toFixed(2)} 元/公斤`;
       $("reportLngExpenseRow").classList.toggle("active", result.hasLng);
+      $("reportLngRentRow").classList.toggle("active", result.hasLng);
       $("reportCostSplitRatio").textContent = context.splitRatioLabel;
       setMeter("profitRateMeter", context.profitRate * 4);
       setMeter("costRateMeter", context.costRate);
@@ -2287,7 +2357,8 @@
         line("人工及社保", result.costs.wage + result.costs.social),
         line("运营及赠品", result.costs.ops + result.costs.gift),
         line("证照及行政合规支出", result.costs.complianceAdmin),
-        line("租金及资产折旧", result.costs.landRent + result.costs.depreciation),
+        line("土地/油站租金", result.costs.landRent, false, "rent"),
+        line("资产折旧", result.costs.depreciation),
         line("财务成本", result.costs.financeCost),
         line("保险及税费类成本", result.costs.insurance + result.costs.propertyTax + result.costs.landUseTax),
         line("成本合计", result.costs.total, true),
@@ -2343,9 +2414,13 @@
       $("reportCostRate").textContent = "0.00%";
       $("reportTaxRate").textContent = "0.00%";
       $("reportGasExpensePerTon").textContent = "0 元/吨 / 0.00 元/升";
+      $("reportGasRentPerTon").textContent = "0 元/吨 / 0.00 元/升";
       $("reportDieselExpensePerTon").textContent = "0 元/吨 / 0.00 元/升";
+      $("reportDieselRentPerTon").textContent = "0 元/吨 / 0.00 元/升";
       $("reportLngExpensePerTon").textContent = "0 元/吨 / 0.00 元/公斤";
+      $("reportLngRentPerTon").textContent = "0 元/吨 / 0.00 元/公斤";
       $("reportLngExpenseRow").classList.remove("active");
+      $("reportLngRentRow").classList.remove("active");
       $("reportCostSplitRatio").textContent = "汽油:柴油 = 3:1";
       setMeter("profitRateMeter", 0);
       setMeter("costRateMeter", 0);
@@ -2532,8 +2607,9 @@
     }
 
     function setSample() {
+      const includeLng = $("hasLng").checked;
       const sample = {
-        vol92: 5000, vol95: 2000, volDiesel: 3000,
+        vol92: 5000, vol95: 2000, volDiesel: 3000, volLng: includeLng ? 15000 : 0,
         employeeCount: 5, avgSalary: 6000,
         opsCost: 8000, giftCost: 2000,
         licenseCost: 8000, adminCost: 0,
@@ -2546,12 +2622,13 @@
       Object.entries(sample).forEach(([id, value]) => { $(id).value = value; });
       $("hasSocial").checked = true;
       $("hasLicense").checked = true;
-      $("hasLng").checked = false;
+      $("hasLng").checked = includeLng;
       $("landRentVatRate").value = "0";
       syncPanels();
-      $("hasLng").checked = false;
       lastResult = null;
-      renderEmptyResult("示例数据已填入，点击“按月度计算”或“按年度计算”查看测算结果。");
+      renderEmptyResult(includeLng
+        ? "示例数据已填入，LNG 日均销量为 15 吨，点击“按月度计算”或“按年度计算”查看测算结果。"
+        : "示例数据已填入，点击“按月度计算”或“按年度计算”查看测算结果。");
     }
 
     function resetAll() {
@@ -2950,13 +3027,19 @@
       return y + Math.min(lines.length, maxLines) * lineHeight;
     }
 
-    function drawReportRow(ctx, label, value, x, y, w) {
-      ctx.fillStyle = "#dbe8f2";
+    function drawReportRow(ctx, label, value, x, y, w, tone = "") {
+      const isRent = tone === "rent";
+      if (isRent) {
+        drawRoundRect(ctx, x - 10, y - 28, w + 20, 54, 8);
+        ctx.fillStyle = "#fff4ef";
+        ctx.fill();
+      }
+      ctx.fillStyle = isRent ? "#efb9a8" : "#dbe8f2";
       ctx.fillRect(x, y + 30, w, 2);
-      ctx.fillStyle = "#657789";
+      ctx.fillStyle = isRent ? "#d45a3a" : "#657789";
       ctx.font = "400 24px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
       canvasText(ctx, label, x, y, w * 0.45);
-      ctx.fillStyle = "#0b1f33";
+      ctx.fillStyle = isRent ? "#d45a3a" : "#0b1f33";
       ctx.font = "750 26px -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif";
       ctx.textAlign = "right";
       canvasText(ctx, value, x + w, y, w * 0.55);
@@ -2977,7 +3060,7 @@
     async function createFullReportCanvas(result, stationName = "") {
       const context = getReportContext(result);
       const canvas = document.createElement("canvas");
-      const extraHeight = result.hasLng ? 180 : 0;
+      const extraHeight = 174 + (result.hasLng ? 238 : 0);
       canvas.width = 1080;
       canvas.height = 3060 + extraHeight;
       const ctx = canvas.getContext("2d");
@@ -3037,9 +3120,12 @@
       y = drawReportRow(ctx, "汽油销量 / 毛利率", `${displayValue(result, context.gasolineTons).toFixed(2)} 吨 / ${percent(context.gasolineMarginRate)}`, 110, y, 860);
       y = drawReportRow(ctx, "柴油销量 / 毛利率", `${displayValue(result, context.dieselTons).toFixed(2)} 吨 / ${percent(context.dieselMarginRate)}`, 110, y, 860);
       if (result.hasLng) y = drawReportRow(ctx, "LNG 销量 / 毛利率", `${displayValue(result, context.lngTons).toFixed(2)} 吨 / ${percent(context.lngMarginRate)}`, 110, y, 860);
-      y = drawReportRow(ctx, "汽油费用（吨油 / 升油）", `${context.gasolineExpensePerTon.toFixed(0)} 元/吨 / ${context.gasolineExpensePerLiter.toFixed(2)} 元/升`, 110, y, 860);
-      y = drawReportRow(ctx, "柴油费用（吨油 / 升油）", `${context.dieselExpensePerTon.toFixed(0)} 元/吨 / ${context.dieselExpensePerLiter.toFixed(2)} 元/升`, 110, y, 860);
-      if (result.hasLng) y = drawReportRow(ctx, "LNG 费用（每吨 / 每公斤）", `${context.lngExpensePerTon.toFixed(0)} 元/吨 / ${context.lngExpensePerKg.toFixed(2)} 元/公斤`, 110, y, 860);
+      y = drawReportRow(ctx, "汽油管理费用（每吨 / 每升）", `${context.gasolineExpensePerTon.toFixed(0)} 元/吨 / ${context.gasolineExpensePerLiter.toFixed(2)} 元/升`, 110, y, 860);
+      y = drawReportRow(ctx, "汽油租金成本（每吨 / 每升）", `${context.gasolineRentPerTon.toFixed(0)} 元/吨 / ${context.gasolineRentPerLiter.toFixed(2)} 元/升`, 110, y, 860, "rent");
+      y = drawReportRow(ctx, "柴油管理费用（每吨 / 每升）", `${context.dieselExpensePerTon.toFixed(0)} 元/吨 / ${context.dieselExpensePerLiter.toFixed(2)} 元/升`, 110, y, 860);
+      y = drawReportRow(ctx, "柴油租金成本（每吨 / 每升）", `${context.dieselRentPerTon.toFixed(0)} 元/吨 / ${context.dieselRentPerLiter.toFixed(2)} 元/升`, 110, y, 860, "rent");
+      if (result.hasLng) y = drawReportRow(ctx, "LNG 管理费用（每吨 / 每公斤）", `${context.lngExpensePerTon.toFixed(0)} 元/吨 / ${context.lngExpensePerKg.toFixed(2)} 元/公斤`, 110, y, 860);
+      if (result.hasLng) y = drawReportRow(ctx, "LNG 租金成本（每吨 / 每公斤）", `${context.lngRentPerTon.toFixed(0)} 元/吨 / ${context.lngRentPerKg.toFixed(2)} 元/公斤`, 110, y, 860, "rent");
       y = drawReportRow(ctx, "共同费用分摊系数", context.splitRatioLabel, 110, y, 860);
 
       y += 28;
@@ -3055,7 +3141,8 @@
       y = drawReportRow(ctx, "人工及社保", moneyWan(result.costs.wage + result.costs.social), 110, y, 860);
       y = drawReportRow(ctx, "运营及赠品", moneyWan(result.costs.ops + result.costs.gift), 110, y, 860);
       y = drawReportRow(ctx, "证照及行政合规支出", moneyWan(result.costs.complianceAdmin), 110, y, 860);
-      y = drawReportRow(ctx, "租金及资产折旧", moneyWan(result.costs.landRent + result.costs.depreciation), 110, y, 860);
+      y = drawReportRow(ctx, "土地/油站租金", moneyWan(result.costs.landRent), 110, y, 860, "rent");
+      y = drawReportRow(ctx, "资产折旧", moneyWan(result.costs.depreciation), 110, y, 860);
       y = drawReportRow(ctx, "财务成本", moneyWan(result.costs.financeCost), 110, y, 860);
       y = drawReportRow(ctx, "保险及税费类成本", moneyWan(result.costs.insurance + result.costs.propertyTax + result.costs.landUseTax), 110, y, 860);
 

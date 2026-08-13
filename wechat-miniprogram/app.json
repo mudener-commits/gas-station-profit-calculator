@@ -1,0 +1,13 @@
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "加油（加气）站利润计算器",
+    "navigationBarBackgroundColor": "#004b8d",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f3f8fc"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

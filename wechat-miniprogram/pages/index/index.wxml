@@ -1,0 +1,350 @@
+<view class="page">
+  <view class="topbar">
+    <view class="brand-row">
+      <view class="brand-mark">油</view>
+      <view class="brand-text">
+        <view class="brand-title">加油（加气）站利润计算器</view>
+        <view class="brand-sub">小程序测算版 · 本地计算 · 报告可分享</view>
+      </view>
+    </view>
+    <view class="top-actions">
+      <button class="btn ghost" bindtap="fillSample">填入示例</button>
+      <button class="btn neutral" bindtap="resetForm">清空</button>
+    </view>
+  </view>
+
+  <view class="tabs">
+    <view class="tab {{calculatorTabClass}}" data-tab="calculator" bindtap="switchTab">利润计算器</view>
+    <view class="tab {{reportTabClass}}" data-tab="report" bindtap="switchTab">利润测算报告</view>
+    <view class="tab {{formulaTabClass}}" data-tab="formula" bindtap="switchTab">公式说明与留言</view>
+  </view>
+
+  <view wx:if="{{showCalculator}}" class="content">
+    <view class="section">
+      <view class="section-head"><view class="section-title">销量数据</view><view class="section-note">汽柴油：升/天；LNG：公斤/天</view></view>
+      <view class="section-body grid three">
+        <view class="field"><text>汽油 92# 日均销量</text><input type="number" data-field="vol92" value="{{form.vol92}}" bindinput="onNumberInput" /></view>
+        <view class="field"><text>汽油 95# 日均销量</text><input type="number" data-field="vol95" value="{{form.vol95}}" bindinput="onNumberInput" /></view>
+        <view class="field"><text>柴油日均销量</text><input type="number" data-field="volDiesel" value="{{form.volDiesel}}" bindinput="onNumberInput" /></view>
+      </view>
+      <view class="section-body">
+        <view class="switch-row">
+          <view><view class="switch-title">包含 LNG 加气业务</view><view class="switch-sub">默认不勾选；勾选后录入 LNG 日均销量</view></view>
+          <switch checked="{{form.hasLng}}" data-field="hasLng" bindchange="onSwitchChange" />
+        </view>
+        <view wx:if="{{form.hasLng}}" class="field"><text>LNG 日均销量 公斤/天</text><input type="number" data-field="volLng" value="{{form.volLng}}" bindinput="onNumberInput" /></view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head"><view class="section-title">油气毛利与价格</view></view>
+      <view class="section-body">
+        <view class="switch-row">
+          <view><view class="switch-title">自定义吨油毛利</view><view class="switch-sub">默认毛利：92# 1.00 元/升，95# 1.30 元/升，柴油 0.30 元/升，LNG 0.50 元/公斤</view></view>
+          <switch checked="{{form.customMargin}}" data-field="customMargin" bindchange="onSwitchChange" />
+        </view>
+        <view wx:if="{{form.customMargin}}" class="grid three">
+          <view class="field"><text>92# 毛利 元/吨</text><input type="digit" data-field="margin92" value="{{form.margin92}}" bindinput="onNumberInput" /></view>
+          <view class="field"><text>95# 毛利 元/吨</text><input type="digit" data-field="margin95" value="{{form.margin95}}" bindinput="onNumberInput" /></view>
+          <view class="field"><text>柴油毛利 元/吨</text><input type="digit" data-field="marginDiesel" value="{{form.marginDiesel}}" bindinput="onNumberInput" /></view>
+          <view wx:if="{{form.hasLng}}" class="field"><text>LNG 毛利 元/公斤</text><input type="digit" data-field="marginLng" value="{{form.marginLng}}" bindinput="onNumberInput" /></view>
+        </view>
+        <view class="switch-row">
+          <view><view class="switch-title">自定义采购价/零售价</view><view class="switch-sub">精算时开启；关闭时按参考进价 + 毛利估算</view></view>
+          <switch checked="{{form.customPrice}}" data-field="customPrice" bindchange="onSwitchChange" />
+        </view>
+        <view wx:if="{{form.customPrice}}" class="grid two">
+          <view class="field"><text>金额口径</text><picker range="{{taxModes}}" range-key="label" value="{{taxModeIndex}}" bindchange="onTaxModeChange"><view class="picker">{{taxModeLabel}}</view></picker></view>
+          <view class="field"><text>92# 采购价 元/吨</text><input type="digit" data-field="purchase92" value="{{form.purchase92}}" bindinput="onNumberInput" /></view>
+          <view class="field"><text>92# 零售价 元/吨</text><input type="digit" data-field="sale92" value="{{form.sale92}}" bindinput="onNumberInput" /></view>
+          <view class="field"><text>95# 采购价 元/吨</text><input type="digit" data-field="purchase95" value="{{form.purchase95}}" bindinput="onNumberInput" /></view>
+          <view class="field"><text>95# 零售价 元/吨</text><input type="digit" data-field="sale95" value="{{form.sale95}}" bindinput="onNumberInput" /></view>
+          <view class="field"><text>柴油采购价 元/吨</text><input type="digit" data-field="purchaseDiesel" value="{{form.purchaseDiesel}}" bindinput="onNumberInput" /></view>
+          <view class="field"><text>柴油零售价 元/吨</text><input type="digit" data-field="saleDiesel" value="{{form.saleDiesel}}" bindinput="onNumberInput" /></view>
+          <view wx:if="{{form.hasLng}}" class="field"><text>LNG 采购参考价 元/吨</text><input type="digit" data-field="purchaseLng" value="{{form.purchaseLng}}" bindinput="onNumberInput" /></view>
+          <view wx:if="{{form.hasLng}}" class="field"><text>LNG 销售参考价 元/吨</text><input type="digit" data-field="saleLng" value="{{form.saleLng}}" bindinput="onNumberInput" /></view>
+          <view wx:if="{{form.hasLng}}" class="tip wide">LNG 默认参考价为采购 4000 元/吨、销售 4500 元/吨。各地区、季节价格差异较大，请按当地采购发票和实际销售价格修改。</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head"><view class="section-title">人员成本</view></view>
+      <view class="section-body">
+        <view class="segmented">
+          <view class="{{wagePeopleClass}}" data-mode="people" bindtap="setWageMode">按人头</view>
+          <view class="{{wageTotalClass}}" data-mode="total" bindtap="setWageMode">填总额</view>
+        </view>
+        <view wx:if="{{isWagePeople}}" class="grid two">
+          <view class="field"><text>员工人数</text><input type="number" data-field="employeeCount" value="{{form.employeeCount}}" bindinput="onNumberInput" /></view>
+          <view class="field"><text>人均月薪 元/月</text><input type="digit" data-field="avgSalary" value="{{form.avgSalary}}" bindinput="onNumberInput" /></view>
+        </view>
+        <view wx:else class="field"><text>员工月工资总额 元/月</text><input type="digit" data-field="salaryTotal" value="{{form.salaryTotal}}" bindinput="onNumberInput" /></view>
+        <view class="switch-row">
+          <view><view class="switch-title">为员工缴纳社保</view><view class="switch-sub">按工资总额 32% 估算企业承担部分</view></view>
+          <switch checked="{{form.hasSocial}}" data-field="hasSocial" bindchange="onSwitchChange" />
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head"><view class="section-title">运营费用</view><view class="section-note">元/月</view></view>
+      <view class="section-body grid two">
+        <view class="field"><text>月综合运营费用</text><input type="digit" data-field="opsCost" value="{{form.opsCost}}" bindinput="onNumberInput" /></view>
+        <view class="field"><text>月赠品成本</text><input type="digit" data-field="giftCost" value="{{form.giftCost}}" bindinput="onNumberInput" /></view>
+        <view class="tip wide">建议：非油业务建议单独注册营业执照并单独核算，税务处理上不要和加油站主体捆绑在一起。本工具暂不计入非油业务利润。</view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head"><view class="section-title">行政合规支出</view><view class="section-note">元/年</view></view>
+      <view class="section-body">
+        <view class="switch-row">
+          <view><view class="switch-title">证照及行政合规支出</view><view class="switch-sub">危化证换证、证照年检续期、行政合规等年度估算</view></view>
+          <switch checked="{{form.hasLicense}}" data-field="hasLicense" bindchange="onSwitchChange" />
+        </view>
+        <view class="field"><text>证照及行政合规支出 元/年</text><input type="digit" data-field="licenseCost" value="{{form.licenseCost}}" bindinput="onNumberInput" /></view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head"><view class="section-title">选填经营成本</view><view class="section-note">不填按 0</view></view>
+      <view class="section-body grid two">
+        <view class="field rent-field"><text>土地/油站租金 元/年</text><input type="digit" data-field="landRent" value="{{form.landRent}}" bindinput="onNumberInput" /></view>
+        <view class="field rent-field"><text>租金发票抵扣方式</text><picker range="{{landRentVatRates}}" range-key="label" value="{{landRentVatIndex}}" bindchange="onLandRentVatChange"><view class="picker">{{landRentVatLabel}}</view></picker></view>
+        <view class="tip wide">提示：只有取得可抵扣增值税专用发票时，才选择 5% 或 9%；普通发票不按进项抵扣测算。</view>
+        <view class="field"><text>资产折旧（设备、基础设施工程摊销等）元/年</text><input type="digit" data-field="depreciation" value="{{form.depreciation}}" bindinput="onNumberInput" /></view>
+        <view class="field"><text>汽油共同费用分摊系数</text><input type="digit" data-field="gasCostWeight" value="{{form.gasCostWeight}}" bindinput="onNumberInput" /></view>
+        <view class="field"><text>柴油共同费用分摊系数</text><input type="digit" data-field="dieselCostWeight" value="{{form.dieselCostWeight}}" bindinput="onNumberInput" /></view>
+        <view wx:if="{{form.hasLng}}" class="field"><text>LNG 共同费用分摊系数</text><input type="digit" data-field="lngCostWeight" value="{{form.lngCostWeight}}" bindinput="onNumberInput" /></view>
+        <view class="tip wide">提示：共同费用按“销量吨数 × 分摊系数”分摊；默认汽油:柴油 = 3:1，勾选 LNG 后为汽油:柴油:LNG = 3:1:1。</view>
+        <view class="muted wide">财务成本：贷款利息、刷卡/支付手续费。</view>
+        <view class="field"><text>贷款金额 元</text><input type="digit" data-field="loanAmount" value="{{form.loanAmount}}" bindinput="onNumberInput" /></view>
+        <view class="field"><text>年化利率 %</text><input type="digit" data-field="interestRate" value="{{form.interestRate}}" bindinput="onNumberInput" /></view>
+        <view class="field"><text>刷卡/支付占比 %</text><input type="digit" data-field="cardShare" value="{{form.cardShare}}" bindinput="onNumberInput" /></view>
+        <view class="field"><text>刷卡/支付手续费率 ‰</text><input type="digit" data-field="cardRate" value="{{form.cardRate}}" bindinput="onNumberInput" /></view>
+        <view class="tip wide">提示：刷卡/支付手续费率按千分比填写，默认 3‰；如实际通道费率不同，请按合同或对账单修改。</view>
+        <view class="field"><text>商业保险费用 元/年</text><input type="digit" data-field="insuranceCost" value="{{form.insuranceCost}}" bindinput="onNumberInput" /></view>
+        <view class="field"><text>房产税 元/年</text><input type="digit" data-field="propertyTax" value="{{form.propertyTax}}" bindinput="onNumberInput" /></view>
+        <view class="field"><text>城镇土地使用税 元/年</text><input type="digit" data-field="landUseTax" value="{{form.landUseTax}}" bindinput="onNumberInput" /></view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head"><view class="section-title">税费参数</view><view class="section-note">默认即可</view></view>
+      <view class="section-body grid two">
+        <view class="field"><text>城建税所在地类型</text><picker range="{{cityTaxRates}}" range-key="label" value="{{cityTaxIndex}}" bindchange="onCityTaxChange"><view class="picker">{{cityTaxLabel}}</view></picker></view>
+        <view class="field"><text>企业所得税口径</text><picker range="{{incomeTaxModes}}" range-key="label" value="{{incomeTaxIndex}}" bindchange="onIncomeTaxChange"><view class="picker">{{incomeTaxLabel}}</view></picker></view>
+      </view>
+    </view>
+
+    <view class="section action-section">
+      <view class="grid two wide">
+        <button class="btn primary big" data-period="month" bindtap="startCalculation">按月度计算</button>
+        <button class="btn primary big" data-period="year" bindtap="startCalculation">按年度计算</button>
+      </view>
+      <view class="muted center">点击后先检查漏填项和明显异常数据，确认无误后再生成测算结果和报告。</view>
+    </view>
+
+    <view class="hero-result">
+      <view class="profit-label">{{profitLabelDisplay}}</view>
+      <view class="{{profitValueClass}}">{{profitDisplay}}</view>
+      <view class="profit-sub">{{profitSubDisplay}}</view>
+      <view class="profit-compare">
+        <view class="profit-compare-item"><text>{{heroNetProfitLabelDisplay}}</text><strong>{{heroNetProfitDisplay}}</strong></view>
+        <view class="profit-compare-item ebitda"><text>{{heroEbitdaLabelDisplay}}</text><strong>{{heroEbitdaDisplay}}</strong></view>
+      </view>
+      <view class="kpis">
+        <view><text>测算收入</text><strong>{{revenueDisplay}}</strong></view>
+        <view><text>成本合计</text><strong>{{costDisplay}}</strong></view>
+        <view><text>税费合计</text><strong>{{taxDisplay}}</strong></view>
+      </view>
+      <button wx:if="{{resultReady}}" class="btn primary report-entry" data-tab="report" bindtap="switchTab">
+        <text>查看利润测算报告</text>
+        <text class="report-entry-sub">（完整版）</text>
+      </button>
+    </view>
+
+    <view wx:if="{{hasWarnings}}" class="alert">
+      <block wx:for="{{resultWarnings}}" wx:key="*this"><view>{{item}}</view></block>
+    </view>
+  </view>
+
+  <view wx:if="{{showReport}}" class="content">
+    <view class="report-hero">
+      <view>
+        <view class="report-title">加油（加气）站利润测算报告</view>
+        <view class="report-desc">面向加油（加气）站投资人、经营者和站长使用，帮助快速看清年度利润、成本结构、税费压力和经营风险，便于复盘经营情况、评估投资收益和制定下一步调整方案。</view>
+      </view>
+      <view class="report-profit">
+        <view class="report-profit-pair">
+          <view><text>{{reportProfitLabelDisplay}}</text><strong>{{reportProfitDisplay}}</strong></view>
+          <view class="ebitda"><text>{{reportEbitdaHeroLabelDisplay}}</text><strong>{{reportEbitdaHeroDisplay}}</strong></view>
+        </view>
+        <view>{{reportStatusDisplay}}</view>
+      </view>
+    </view>
+
+    <view class="report-grid">
+      <view class="report-card">
+        <view class="card-title">经营概览</view>
+        <view class="line"><text>{{reportRevenueLabelDisplay}}</text><strong>{{reportRevenueDisplay}}</strong></view>
+        <view class="line"><text>{{reportCostLabelDisplay}}</text><strong>{{reportCostDisplay}}</strong></view>
+        <view class="line"><text>{{reportTaxLabelDisplay}}</text><strong>{{reportTaxDisplay}}</strong></view>
+        <view class="line"><text>{{reportTonsLabelDisplay}}</text><strong>{{reportTonsDisplay}}</strong></view>
+        <view class="line"><text>净回笼资金（EBITDA-息税折旧摊销前净利润）</text><strong>{{ebitdaDisplay}}</strong></view>
+      </view>
+      <view class="report-card">
+        <view class="card-title">压力指标</view>
+        <view class="line"><text>净利率</text><strong>{{profitRateDisplay}}</strong></view>
+        <view class="line"><text>成本占测算收入</text><strong>{{costRateDisplay}}</strong></view>
+        <view class="line"><text>税费占测算收入</text><strong>{{taxRateDisplay}}</strong></view>
+        <view class="line"><text>汽油管理费用（每吨 / 每升）</text><strong>{{gasExpenseDisplay}}</strong></view>
+        <view class="line rent-line"><text>汽油租金成本（每吨 / 每升）</text><strong>{{gasRentDisplay}}</strong></view>
+        <view class="line"><text>柴油管理费用（每吨 / 每升）</text><strong>{{dieselExpenseDisplay}}</strong></view>
+        <view class="line rent-line"><text>柴油租金成本（每吨 / 每升）</text><strong>{{dieselRentDisplay}}</strong></view>
+        <view wx:if="{{resultHasLng}}" class="line"><text>LNG 管理费用（每吨 / 每公斤）</text><strong>{{lngExpenseDisplay}}</strong></view>
+        <view wx:if="{{resultHasLng}}" class="line rent-line"><text>LNG 租金成本（每吨 / 每公斤）</text><strong>{{lngRentDisplay}}</strong></view>
+        <view class="line"><text>共同费用分摊系数</text><strong>{{costSplitRatioDisplay}}</strong></view>
+      </view>
+      <view class="report-card">
+        <view class="card-title">油气结构</view>
+        <view class="line"><text>{{gasolineVolumeMarginLabel}}</text><strong>{{gasolineVolumeMarginDisplay}}</strong></view>
+        <view class="line"><text>{{dieselVolumeMarginLabel}}</text><strong>{{dieselVolumeMarginDisplay}}</strong></view>
+        <view wx:if="{{resultHasLng}}" class="line"><text>{{lngVolumeMarginLabel}}</text><strong>{{lngVolumeMarginDisplay}}</strong></view>
+      </view>
+      <view class="report-card">
+        <view class="card-title">成本结构</view>
+        <block wx:if="{{resultReady}}">
+          <block wx:for="{{resultCostLines}}" wx:key="label">
+            <view class="line {{item.tone === 'rent' ? 'rent-line' : ''}}"><text>{{item.label}}</text><strong>{{item.value}}</strong></view>
+          </block>
+        </block>
+        <view wx:else class="muted">生成结果后展示成本结构。</view>
+      </view>
+      <view class="report-card">
+        <view class="card-title">报告提示</view>
+        <block wx:if="{{resultReady}}">
+          <block wx:for="{{resultActions}}" wx:key="title">
+            <view class="action-item"><text>{{item.num}}</text><view><strong>{{item.title}}</strong><span>{{item.body}}</span></view></view>
+          </block>
+        </block>
+        <view wx:else class="muted">生成结果后展示报告提示。</view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head"><view class="section-title">简要分享图预览</view><view class="section-note">无需填写油站名称</view></view>
+      <view class="section-body">
+        <view class="full-report-preview share-image-preview">
+          <view class="preview-title">加油（加气）站利润测算</view>
+          <view class="preview-desc">快速展示销量、利润和主要经营数据，不显示油站名称。</view>
+          <view class="line"><text>{{shareRevenueLabelDisplay}}</text><strong>{{shareRevenueDisplay}}</strong></view>
+          <view class="line"><text>{{shareCostLabelDisplay}}</text><strong>{{shareCostDisplay}}</strong></view>
+          <view class="line"><text>{{shareTaxLabelDisplay}}</text><strong>{{shareTaxDisplay}}</strong></view>
+          <view class="line key-data"><text>{{shareProfitLabelDisplay}}</text><strong>{{shareProfitDisplay}}</strong></view>
+          <view class="line key-data"><text>{{shareEbitdaLabelDisplay}}</text><strong>{{shareEbitdaDisplay}}</strong></view>
+          <view class="line"><text>92# 日均销量</text><strong>{{shareVol92Display}}</strong></view>
+          <view class="line"><text>95# 日均销量</text><strong>{{shareVol95Display}}</strong></view>
+          <view class="line"><text>柴油日均销量</text><strong>{{shareVolDieselDisplay}}</strong></view>
+          <view wx:if="{{resultHasLng}}" class="line"><text>LNG 日均销量</text><strong>{{shareVolLngDisplay}}</strong></view>
+          <view class="share-preview-note">简要图片不显示油站名称，净利润和净回笼资金以红色重点显示，适合快速转发交流。</view>
+        </view>
+        <view class="grid two">
+          <button class="btn primary" data-action="share" bindtap="createSummaryImage">分享简要结果图片</button>
+          <button class="btn ghost" data-action="save" bindtap="createSummaryImage">保存简要结果图片</button>
+        </view>
+      </view>
+    </view>
+
+    <view class="section">
+      <view class="section-head"><view class="section-title">完整版报告图片</view><view class="section-note">需填写油站名称</view></view>
+      <view class="section-body">
+        <view class="full-report-preview full-report-intro">
+          <view class="preview-title">加油（加气）站利润测算报告（完整版）</view>
+          <view class="preview-desc">包含经营概览、压力指标、油气结构、成本结构、税费摘要和报告提示，适合正式沟通或留存。</view>
+          <view class="line"><text>报告格式</text><strong>PNG 长图</strong></view>
+          <view class="line"><text>内容范围</text><strong>报告全文</strong></view>
+          <view class="line"><text>生成要求</text><strong>填写加油（加气）站名称</strong></view>
+        </view>
+        <view class="field"><text>加油（加气）站名称</text><input value="{{reportStationName}}" placeholder="生成报告图片前请填写" bindinput="onReportStationNameInput" /></view>
+        <view class="grid two">
+          <button class="btn primary" data-action="share" bindtap="createReportImage">分享完整报告图片</button>
+          <button class="btn ghost" data-action="save" bindtap="createReportImage">保存完整报告图片</button>
+        </view>
+      </view>
+    </view>
+
+    <view class="section asset-section">
+      <view class="section-head"><view class="section-title">油站资产流转服务</view><view class="section-note">免费登记</view></view>
+      <view class="section-body">
+        <view class="asset-intro">
+          <view class="asset-free-badge">免费登记，免费推介，不公开展示</view>
+          <view class="preview-title">油站转让/出租信息登记</view>
+          <view class="preview-desc">如果您有加油站出售、出租、整体转让或合作经营需求，可以免费登记联系方式和基本情况。我们长期接触油站投资人、经营者和承租方，可根据您的实际诉求协助匹配意向客户。</view>
+        </view>
+        <view class="grid two">
+          <view class="field"><text>联系人称呼</text><input data-field="assetContactName" value="{{lead.assetContactName}}" placeholder="例如：王总 / 李站长" bindinput="onLeadInput" /></view>
+          <view class="field"><text>手机号或微信号</text><input data-field="assetContactMethod" value="{{lead.assetContactMethod}}" placeholder="请填写便于联系的方式" bindinput="onLeadInput" /></view>
+          <view class="field"><text>油站所在省市</text><input data-field="assetRegion" value="{{lead.assetRegion}}" placeholder="例如：山东济南" bindinput="onLeadInput" /></view>
+          <view class="field"><text>需求类型</text><picker range="{{demandTypes}}" value="{{leadDemandIndex}}" bindchange="onLeadDemandChange"><view class="picker">{{leadDemandLabel}}</view></picker></view>
+          <view class="field"><text>油站状态</text><picker range="{{stationStatuses}}" value="{{leadStatusIndex}}" bindchange="onLeadStatusChange"><view class="picker">{{leadStatusLabel}}</view></picker></view>
+          <view class="field"><text>油站类型</text><picker range="{{stationTypes}}" value="{{leadTypeIndex}}" bindchange="onLeadTypeChange"><view class="picker">{{leadTypeLabel}}</view></picker></view>
+          <view class="field"><text>是否有土地证</text><picker range="{{landCertOptions}}" value="{{leadLandCertIndex}}" bindchange="onLeadLandCertChange"><view class="picker">{{leadLandCertLabel}}</view></picker></view>
+        </view>
+        <label class="consent"><checkbox checked="{{leadConsent}}" bindtap="toggleLeadConsent" />我确认以上信息为自愿提交，同意“加油站漫谈”作者或服务团队仅用于油站转让、出租、合作经营等免费推介和沟通对接，不公开展示。</label>
+        <button class="btn primary asset-submit" bindtap="submitAssetLead">免费登记油站流转需求</button>
+        <view class="muted">预览版会先保存在本机；正式小程序版可接入云开发后台。</view>
+
+        <view class="asset-records">
+          <view class="asset-records-head">
+            <view>
+              <view class="asset-records-title">我的登记记录</view>
+              <view class="asset-records-sub">仅当前手机本机可见</view>
+            </view>
+            <view wx:if="{{hasAssetLeadRecords}}" class="asset-records-count">{{assetLeadRecords.length}} 条</view>
+          </view>
+          <block wx:if="{{hasAssetLeadRecords}}">
+            <block wx:for="{{assetLeadRecords}}" wx:key="time">
+              <view class="asset-record-item">
+                <view class="asset-record-top">
+                  <view class="asset-record-demand">{{item.demandType}}</view>
+                  <view class="asset-record-status">已登记</view>
+                </view>
+                <view class="asset-record-time">登记时间：{{item.timeDisplay}}</view>
+                <view class="asset-record-line"><text>油站信息</text><strong>{{item.regionDisplay}} · {{item.stationTypeDisplay}}</strong></view>
+                <view class="asset-record-line"><text>联系人</text><strong>{{item.name}} · {{item.contact}}</strong></view>
+                <view class="asset-record-line"><text>其他情况</text><strong>{{item.stationStatusDisplay}} · {{item.landCertDisplay}}</strong></view>
+              </view>
+            </block>
+          </block>
+          <view wx:else class="asset-record-empty">完成登记后，记录会显示在这里。</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{showFormula}}" class="content">
+    <view class="section">
+      <view class="section-head"><view class="section-title">完整计算公式</view><view class="section-note">完整展开，便于核对</view></view>
+      <view class="section-body formula">
+        <view class="formula-block"><strong>1. 销量与吨数换算</strong><text>年度销量（升）= 日均销量（升/天）× 365</text><text>年度销量（吨）= 年度销量（升）× 密度 ÷ 1000</text><text>LNG 年度销量（吨）= 日均销量（公斤/天）× 365 ÷ 1000</text><view>汽油 92#、95# 默认密度为 0.73 kg/L，柴油默认密度为 0.84 kg/L；LNG 报告统一按吨展示。</view></view>
+        <view class="formula-block"><strong>2. 毛利、采购价与零售价</strong><text>默认含税零售价 = 参考含税采购价 + 吨油毛利</text><text>升毛利换算吨毛利 = 元/升 ÷ 密度 × 1000</text><text>LNG 默认毛利 = 0.50 元/公斤，参考采购价 4000 元/吨，参考销售价 4500 元/吨</text><view>如果开启“自定义采购价/零售价”，系统优先使用用户填写的价格。</view></view>
+        <view class="formula-block"><strong>3. 成本合计</strong><text>人员工资 = 月工资总额 × 12</text><text>企业社保 = 人员工资 × 32%</text><text>贷款利息 = 贷款金额 × 年化利率</text><text>财务成本 = 贷款利息 + 刷卡/支付手续费</text><text>取得租金可抵扣专票时：土地/油站租金成本 = 含税租金 ÷ (1 + 发票税率)</text></view>
+        <view class="formula-block"><strong>4. 税费、净利润与费用分摊</strong><text>销项税额 = 成品油不含税收入 × 13% + LNG 不含税收入 × 9%</text><text>租金专票进项税额 = 含税租金 - 土地/油站租金成本</text><text>进项税额 = 成品油采购成本 × 13% + LNG 采购成本 × 9% + 租金专票进项税额</text><text>增值税应纳税额 = max(销项税额 - 进项税额, 0)</text><text>城建税及教育附加按增值税应纳税额同步测算</text><text>年度净利润 = 利润测算收入合计 - 成本合计 - 税费合计</text><text>月度结果 = 年度结果 ÷ 12</text><text>净回笼资金（EBITDA-息税折旧摊销前净利润）= 净利润 + 企业所得税 + 贷款利息 + 资产折旧</text><text>管理费用池 = 成本合计 - 油气采购成本 - 土地/油站租金成本</text><text>租金费用池 = 价税分离后的土地/油站租金成本</text><text>共同费用分摊权重 = 对应品类销量吨数 × 用户填写的分摊系数</text><text>默认分摊系数为汽油:柴油:LNG = 3:1:1</text><text>管理费用和租金成本分别按相同权重分摊；汽柴油展示每吨/每升，LNG 展示每吨/每公斤</text></view>
+        <view class="muted">免责声明：本工具测算结果仅用于经营参考，不构成税务、财务、法律或投资建议，不作为纳税申报依据。</view>
+      </view>
+    </view>
+    <view class="section">
+      <view class="section-head"><view class="section-title">给作者留言</view><view class="section-note">后台可回复</view></view>
+      <view class="section-body">
+        <view class="field"><text>称呼</text><input data-field="messageName" value="{{message.messageName}}" placeholder="例如：王站长" bindinput="onMessageInput" /></view>
+        <view class="field"><text>联系方式（选填）</text><input data-field="messageContact" value="{{message.messageContact}}" placeholder="微信号或手机号，方便作者回复" bindinput="onMessageInput" /></view>
+        <view class="field"><text>留言内容</text><textarea data-field="messageContent" value="{{message.messageContent}}" placeholder="可以写公式建议、功能需求、行业口径问题。" bindinput="onMessageInput" /></view>
+        <button class="btn primary" bindtap="submitMessage">提交留言</button>
+      </view>
+    </view>
+  </view>
+
+  <canvas type="2d" id="reportCanvas" class="hidden-canvas"></canvas>
+</view>
