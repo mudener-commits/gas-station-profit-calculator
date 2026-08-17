@@ -1,7 +1,7 @@
 <view class="page">
   <view class="topbar">
     <view class="brand-row">
-      <view class="brand-mark">油</view>
+      <image class="brand-mark" src="/images/miniprogram-profit-icon-512.png" mode="aspectFill" />
       <view class="brand-text">
         <view class="brand-title">加油（加气）站利润计算器</view>
         <view class="brand-sub">小程序测算版 · 本地计算 · 报告可分享</view>

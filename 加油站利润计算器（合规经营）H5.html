@@ -89,12 +89,11 @@
       width: 38px;
       height: 38px;
       border-radius: 8px;
-      background: linear-gradient(135deg, var(--green-2), var(--amber));
-      color: #fff;
-      border: 2px solid rgba(255, 255, 255, .74);
-      display: grid;
-      place-items: center;
-      font-weight: 800;
+      display: block;
+      object-fit: cover;
+      background: #fff;
+      border: 1px solid rgba(0, 103, 177, .16);
+      box-shadow: 0 4px 12px rgba(0, 75, 141, .12);
       flex: 0 0 auto;
     }
 
@@ -1270,7 +1269,7 @@
     <header class="topbar">
       <div class="topbar-inner">
         <div class="brand">
-          <div class="brand-mark">油</div>
+          <img class="brand-mark" src="assets/miniprogram-profit-icon-512.png" alt="加油（加气）站利润计算器 Logo">
           <div>
             <h1>加油（加气）站利润计算器</h1>
             <p>H5 测算版 · 本地计算 · 结果可生成 PNG 图片</p>

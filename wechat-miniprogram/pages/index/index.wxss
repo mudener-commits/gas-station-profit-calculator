@@ -26,12 +26,10 @@
   width: 72rpx;
   height: 72rpx;
   border-radius: 16rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #004b8d, #00a3e0);
-  color: #fff;
-  font-weight: 800;
+  display: block;
+  background: #fff;
+  border: 1rpx solid rgba(0, 103, 177, .16);
+  box-shadow: 0 8rpx 20rpx rgba(0, 75, 141, .12);
   flex: 0 0 auto;
 }
 
