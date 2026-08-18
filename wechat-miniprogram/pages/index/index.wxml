@@ -16,7 +16,7 @@
   <view class="tabs">
     <view class="tab {{calculatorTabClass}}" data-tab="calculator" bindtap="switchTab">利润计算器</view>
     <view class="tab {{reportTabClass}}" data-tab="report" bindtap="switchTab">利润测算报告</view>
-    <view class="tab {{formulaTabClass}}" data-tab="formula" bindtap="switchTab">公式说明与留言</view>
+    <view class="tab {{formulaTabClass}}" data-tab="formula" bindtap="switchTab">公式说明</view>
   </view>
 
   <view wx:if="{{showCalculator}}" class="content">
@@ -275,53 +275,6 @@
       </view>
     </view>
 
-    <view class="section asset-section">
-      <view class="section-head"><view class="section-title">油站资产流转服务</view><view class="section-note">免费登记</view></view>
-      <view class="section-body">
-        <view class="asset-intro">
-          <view class="asset-free-badge">免费登记，免费推介，不公开展示</view>
-          <view class="preview-title">油站转让/出租信息登记</view>
-          <view class="preview-desc">如果您有加油站出售、出租、整体转让或合作经营需求，可以免费登记联系方式和基本情况。我们长期接触油站投资人、经营者和承租方，可根据您的实际诉求协助匹配意向客户。</view>
-        </view>
-        <view class="grid two">
-          <view class="field"><text>联系人称呼</text><input data-field="assetContactName" value="{{lead.assetContactName}}" placeholder="例如：王总 / 李站长" bindinput="onLeadInput" /></view>
-          <view class="field"><text>手机号或微信号</text><input data-field="assetContactMethod" value="{{lead.assetContactMethod}}" placeholder="请填写便于联系的方式" bindinput="onLeadInput" /></view>
-          <view class="field"><text>油站所在省市</text><input data-field="assetRegion" value="{{lead.assetRegion}}" placeholder="例如：山东济南" bindinput="onLeadInput" /></view>
-          <view class="field"><text>需求类型</text><picker range="{{demandTypes}}" value="{{leadDemandIndex}}" bindchange="onLeadDemandChange"><view class="picker">{{leadDemandLabel}}</view></picker></view>
-          <view class="field"><text>油站状态</text><picker range="{{stationStatuses}}" value="{{leadStatusIndex}}" bindchange="onLeadStatusChange"><view class="picker">{{leadStatusLabel}}</view></picker></view>
-          <view class="field"><text>油站类型</text><picker range="{{stationTypes}}" value="{{leadTypeIndex}}" bindchange="onLeadTypeChange"><view class="picker">{{leadTypeLabel}}</view></picker></view>
-          <view class="field"><text>是否有土地证</text><picker range="{{landCertOptions}}" value="{{leadLandCertIndex}}" bindchange="onLeadLandCertChange"><view class="picker">{{leadLandCertLabel}}</view></picker></view>
-        </view>
-        <label class="consent"><checkbox checked="{{leadConsent}}" bindtap="toggleLeadConsent" />我确认以上信息为自愿提交，同意“加油站漫谈”作者或服务团队仅用于油站转让、出租、合作经营等免费推介和沟通对接，不公开展示。</label>
-        <button class="btn primary asset-submit" bindtap="submitAssetLead">免费登记油站流转需求</button>
-        <view class="muted">预览版会先保存在本机；正式小程序版可接入云开发后台。</view>
-
-        <view class="asset-records">
-          <view class="asset-records-head">
-            <view>
-              <view class="asset-records-title">我的登记记录</view>
-              <view class="asset-records-sub">仅当前手机本机可见</view>
-            </view>
-            <view wx:if="{{hasAssetLeadRecords}}" class="asset-records-count">{{assetLeadRecords.length}} 条</view>
-          </view>
-          <block wx:if="{{hasAssetLeadRecords}}">
-            <block wx:for="{{assetLeadRecords}}" wx:key="time">
-              <view class="asset-record-item">
-                <view class="asset-record-top">
-                  <view class="asset-record-demand">{{item.demandType}}</view>
-                  <view class="asset-record-status">已登记</view>
-                </view>
-                <view class="asset-record-time">登记时间：{{item.timeDisplay}}</view>
-                <view class="asset-record-line"><text>油站信息</text><strong>{{item.regionDisplay}} · {{item.stationTypeDisplay}}</strong></view>
-                <view class="asset-record-line"><text>联系人</text><strong>{{item.name}} · {{item.contact}}</strong></view>
-                <view class="asset-record-line"><text>其他情况</text><strong>{{item.stationStatusDisplay}} · {{item.landCertDisplay}}</strong></view>
-              </view>
-            </block>
-          </block>
-          <view wx:else class="asset-record-empty">完成登记后，记录会显示在这里。</view>
-        </view>
-      </view>
-    </view>
   </view>
 
   <view wx:if="{{showFormula}}" class="content">
@@ -333,15 +286,6 @@
         <view class="formula-block"><strong>3. 成本合计</strong><text>人员工资 = 月工资总额 × 12</text><text>企业社保 = 人员工资 × 32%</text><text>贷款利息 = 贷款金额 × 年化利率</text><text>财务成本 = 贷款利息 + 刷卡/支付手续费</text><text>取得租金可抵扣专票时：土地/油站租金成本 = 含税租金 ÷ (1 + 发票税率)</text></view>
         <view class="formula-block"><strong>4. 税费、净利润与费用分摊</strong><text>销项税额 = 成品油不含税收入 × 13% + LNG 不含税收入 × 9%</text><text>租金专票进项税额 = 含税租金 - 土地/油站租金成本</text><text>进项税额 = 成品油采购成本 × 13% + LNG 采购成本 × 9% + 租金专票进项税额</text><text>增值税应纳税额 = max(销项税额 - 进项税额, 0)</text><text>城建税及教育附加按增值税应纳税额同步测算</text><text>年度净利润 = 利润测算收入合计 - 成本合计 - 税费合计</text><text>月度结果 = 年度结果 ÷ 12</text><text>净回笼资金（EBITDA-息税折旧摊销前净利润）= 净利润 + 企业所得税 + 贷款利息 + 资产折旧</text><text>管理费用池 = 成本合计 - 油气采购成本 - 土地/油站租金成本</text><text>租金费用池 = 价税分离后的土地/油站租金成本</text><text>共同费用分摊权重 = 对应品类销量吨数 × 用户填写的分摊系数</text><text>默认分摊系数为汽油:柴油:LNG = 3:1:1</text><text>管理费用和租金成本分别按相同权重分摊；汽柴油展示每吨/每升，LNG 展示每吨/每公斤</text></view>
         <view class="muted">免责声明：本工具测算结果仅用于经营参考，不构成税务、财务、法律或投资建议，不作为纳税申报依据。</view>
-      </view>
-    </view>
-    <view class="section">
-      <view class="section-head"><view class="section-title">给作者留言</view><view class="section-note">后台可回复</view></view>
-      <view class="section-body">
-        <view class="field"><text>称呼</text><input data-field="messageName" value="{{message.messageName}}" placeholder="例如：王站长" bindinput="onMessageInput" /></view>
-        <view class="field"><text>联系方式（选填）</text><input data-field="messageContact" value="{{message.messageContact}}" placeholder="微信号或手机号，方便作者回复" bindinput="onMessageInput" /></view>
-        <view class="field"><text>留言内容</text><textarea data-field="messageContent" value="{{message.messageContent}}" placeholder="可以写公式建议、功能需求、行业口径问题。" bindinput="onMessageInput" /></view>
-        <button class="btn primary" bindtap="submitMessage">提交留言</button>
       </view>
     </view>
   </view>

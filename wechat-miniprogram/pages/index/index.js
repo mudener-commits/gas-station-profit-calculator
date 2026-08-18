@@ -310,36 +310,39 @@ Page({
       { label: "无可抵扣专票", value: 0 },
       { label: "5%专票（出租方简易计税）", value: 0.05 },
       { label: "9%专票（一般计税）", value: 0.09 }
-    ],
-    demandTypes: ["请选择", "出售", "出租", "整体转让（转租）", "合作经营", "想先了解估值"],
-    stationStatuses: ["请选择", "正在营业（自营）", "正在营业（租赁）", "新建未运营", "其他"],
-    stationTypes: ["请选择", "城区站", "国省道站", "乡镇站", "其他"],
-    landCertOptions: ["请选择", "有", "没有", "不确定", "不方便透露"],
-    leadDemandIndex: 0,
-    leadStatusIndex: 0,
-    leadTypeIndex: 0,
-    leadLandCertIndex: 0,
-    leadDemandLabel: "请选择",
-    leadStatusLabel: "请选择",
-    leadTypeLabel: "请选择",
-    leadLandCertLabel: "请选择",
-    leadConsent: false,
-    assetLeadRecords: [],
-    hasAssetLeadRecords: false,
-    lead: {
-      assetContactName: "",
-      assetContactMethod: "",
-      assetRegion: ""
-    },
-    message: {
-      messageName: "",
-      messageContact: "",
-      messageContent: ""
-    }
+    ]
   },
 
   onLoad() {
-    this.loadAssetLeadRecords();
+    wx.removeStorageSync("gasStationAssetLeads");
+    wx.removeStorageSync("gasStationCalcMessages");
+    wx.showShareMenu({
+      withShareTicket: false,
+      menus: ["shareAppMessage", "shareTimeline"]
+    });
+    if (wx.onCopyUrl) {
+      wx.onCopyUrl(() => ({ query: "" }));
+    }
+  },
+
+  onUnload() {
+    if (wx.offCopyUrl) wx.offCopyUrl();
+  },
+
+  onShareAppMessage() {
+    return {
+      title: "加油（加气）站利润计算器｜快速测算油站利润",
+      path: "/pages/index/index",
+      imageUrl: "/images/share-card-5x4.png"
+    };
+  },
+
+  onShareTimeline() {
+    return {
+      title: "加油（加气）站利润计算器｜快速测算油站利润",
+      query: "",
+      imageUrl: "/images/miniprogram-profit-icon-512.png"
+    };
   },
 
   switchTab(event) {
@@ -1277,126 +1280,4 @@ Page({
     return footerY + 106;
   },
 
-  onLeadInput(event) {
-    const field = event.currentTarget.dataset.field;
-    this.setData({ [`lead.${field}`]: event.detail.value });
-  },
-
-  onLeadDemandChange(event) {
-    const index = Number(event.detail.value);
-    this.setData({ leadDemandIndex: index, leadDemandLabel: this.data.demandTypes[index] });
-  },
-
-  onLeadStatusChange(event) {
-    const index = Number(event.detail.value);
-    this.setData({ leadStatusIndex: index, leadStatusLabel: this.data.stationStatuses[index] });
-  },
-
-  onLeadTypeChange(event) {
-    const index = Number(event.detail.value);
-    this.setData({ leadTypeIndex: index, leadTypeLabel: this.data.stationTypes[index] });
-  },
-
-  onLeadLandCertChange(event) {
-    const index = Number(event.detail.value);
-    this.setData({ leadLandCertIndex: index, leadLandCertLabel: this.data.landCertOptions[index] });
-  },
-
-  toggleLeadConsent() {
-    this.setData({ leadConsent: !this.data.leadConsent });
-  },
-
-  loadAssetLeadRecords() {
-    const stored = wx.getStorageSync("gasStationAssetLeads");
-    const list = Array.isArray(stored) ? stored : [];
-    const records = list.map((item, index) => ({
-      ...item,
-      recordNo: list.length - index,
-      timeDisplay: formatLocalTime(item.time),
-      regionDisplay: item.region || "地区未填写",
-      stationStatusDisplay: item.stationStatus && item.stationStatus !== "请选择" ? item.stationStatus : "状态未填写",
-      stationTypeDisplay: item.stationType && item.stationType !== "请选择" ? item.stationType : "类型未填写",
-      landCertDisplay: item.landCert && item.landCert !== "请选择" ? `土地证：${item.landCert}` : "土地证：未填写"
-    }));
-    this.setData({
-      assetLeadRecords: records,
-      hasAssetLeadRecords: records.length > 0
-    });
-  },
-
-  submitAssetLead() {
-    const lead = this.data.lead;
-    if (!lead.assetContactName) {
-      wx.showToast({ title: "请填写称呼", icon: "none" });
-      return;
-    }
-    if (!lead.assetContactMethod) {
-      wx.showToast({ title: "请填写联系方式", icon: "none" });
-      return;
-    }
-    if (this.data.leadDemandIndex <= 0) {
-      wx.showToast({ title: "请选择需求类型", icon: "none" });
-      return;
-    }
-    if (!this.data.leadConsent) {
-      wx.showToast({ title: "请先勾选自愿提交确认", icon: "none" });
-      return;
-    }
-
-    const item = {
-      name: lead.assetContactName,
-      contact: lead.assetContactMethod,
-      region: lead.assetRegion,
-      demandType: this.data.demandTypes[this.data.leadDemandIndex],
-      stationStatus: this.data.stationStatuses[this.data.leadStatusIndex] || "",
-      stationType: this.data.stationTypes[this.data.leadTypeIndex] || "",
-      landCert: this.data.landCertOptions[this.data.leadLandCertIndex] || "",
-      time: new Date().toISOString()
-    };
-    const list = wx.getStorageSync("gasStationAssetLeads") || [];
-    list.unshift(item);
-    wx.setStorageSync("gasStationAssetLeads", list.slice(0, 30));
-    this.setData({
-      lead: { assetContactName: "", assetContactMethod: "", assetRegion: "" },
-      leadDemandIndex: 0,
-      leadStatusIndex: 0,
-      leadTypeIndex: 0,
-      leadLandCertIndex: 0,
-      leadDemandLabel: "请选择",
-      leadStatusLabel: "请选择",
-      leadTypeLabel: "请选择",
-      leadLandCertLabel: "请选择",
-      leadConsent: false
-    });
-    this.loadAssetLeadRecords();
-    wx.showModal({
-      title: "登记成功",
-      content: "已生成登记记录，可在下方“我的登记记录”中查看。当前预览版记录仅保存在本机；正式接入后台后，服务团队可据此跟进并协助匹配意向客户。",
-      showCancel: false,
-      confirmText: "查看记录"
-    });
-  },
-
-  onMessageInput(event) {
-    const field = event.currentTarget.dataset.field;
-    this.setData({ [`message.${field}`]: event.detail.value });
-  },
-
-  submitMessage() {
-    const message = this.data.message;
-    if (!message.messageContent) {
-      wx.showToast({ title: "请填写留言内容", icon: "none" });
-      return;
-    }
-    const list = wx.getStorageSync("gasStationCalcMessages") || [];
-    list.unshift({
-      name: message.messageName,
-      contact: message.messageContact,
-      content: message.messageContent,
-      time: new Date().toISOString()
-    });
-    wx.setStorageSync("gasStationCalcMessages", list.slice(0, 30));
-    this.setData({ message: { messageName: "", messageContact: "", messageContent: "" } });
-    wx.showToast({ title: "已提交" });
-  }
 });

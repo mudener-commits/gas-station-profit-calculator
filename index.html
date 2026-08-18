@@ -904,95 +904,6 @@
       border-bottom: 0;
     }
 
-    .asset-lead-intro {
-      border: 1px solid #f2c4c4;
-      border-radius: 8px;
-      background:
-        linear-gradient(135deg, #fff4f3 0%, #f6fbff 58%, #ffffff 100%);
-      padding: 16px;
-      display: grid;
-      gap: 8px;
-    }
-
-    .asset-service-section {
-      border-color: #f2c4c4;
-      box-shadow: 0 18px 42px rgba(198, 70, 70, .13);
-    }
-
-    .asset-service-section .section-head {
-      border-bottom-color: #f2c4c4;
-      background: linear-gradient(90deg, #fff0f0, #f6fbff);
-    }
-
-    .asset-service-section .section-title {
-      color: #b82935;
-    }
-
-    .asset-service-section .section-note {
-      color: #c64646;
-      font-weight: 800;
-    }
-
-    .asset-lead-intro h3 {
-      margin: 0;
-      color: #b82935;
-      font-size: 20px;
-    }
-
-    .asset-lead-intro p {
-      margin: 0;
-      color: #17324a;
-      font-size: 14px;
-      line-height: 1.65;
-    }
-
-    .asset-free-badge {
-      width: fit-content;
-      border-radius: 999px;
-      background: #ffe4e4;
-      color: #b82935;
-      padding: 5px 10px;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .asset-submit-btn {
-      background: linear-gradient(135deg, #c64646, #e15a4f);
-    }
-
-    .asset-submit-btn:hover {
-      background: linear-gradient(135deg, #b82935, #cf3e3e);
-    }
-
-    .consent-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.55;
-    }
-
-    .consent-row input {
-      margin-top: 3px;
-      flex: 0 0 auto;
-    }
-
-    .lead-status {
-      display: none;
-      border-radius: 8px;
-      border: 1px solid #b9dccb;
-      background: #f0fbf5;
-      color: #1f7048;
-      padding: 10px 12px;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .lead-status.active {
-      display: block;
-    }
-
     .action-item {
       display: grid;
       grid-template-columns: 30px minmax(0, 1fr);
@@ -1066,61 +977,6 @@
       border: 1px solid var(--line);
       color: var(--ink);
       white-space: normal;
-    }
-
-    .message-form {
-      display: grid;
-      gap: 12px;
-    }
-
-    .message-form textarea {
-      width: 100%;
-      min-height: 132px;
-      resize: vertical;
-      border: 1px solid #cddde9;
-      border-radius: 8px;
-      padding: 10px;
-      color: var(--ink);
-      outline: none;
-    }
-
-    .message-form textarea:focus {
-      border-color: var(--green);
-      box-shadow: 0 0 0 3px rgba(0, 103, 177, .12);
-    }
-
-    .message-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .message-item {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 12px;
-      background: #f7fbfe;
-    }
-
-    .message-item strong {
-      display: block;
-      font-size: 14px;
-    }
-
-    .message-item p {
-      margin: 8px 0 0;
-      color: #17324a;
-      line-height: 1.55;
-      font-size: 13px;
-    }
-
-    .reply-box {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      background: #eef6fb;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.5;
     }
 
     .modal-backdrop {
@@ -1285,7 +1141,7 @@
     <nav class="page-tabs" aria-label="页面切换">
       <button class="active" type="button" data-page-target="calculatorPage">利润计算器</button>
       <button type="button" data-page-target="reportPage">利润测算报告</button>
-      <button type="button" data-page-target="formulaPage">公式说明与留言</button>
+      <button type="button" data-page-target="formulaPage">公式说明</button>
     </nav>
 
     <section class="page-view active" id="calculatorPage">
@@ -1730,38 +1586,6 @@
         </div>
       </section>
 
-      <section class="section report-share-panel asset-service-section">
-        <div class="section-head">
-          <h2 class="section-title">油站资产流转服务</h2>
-          <span class="section-note">免费登记</span>
-        </div>
-        <div class="section-body">
-          <div class="asset-lead-intro">
-            <div class="asset-free-badge">免费登记，免费推介，不公开展示</div>
-            <h3>油站转让/出租信息登记</h3>
-            <p>如果您有加油站出售、出租、整体转让或合作经营需求，可以免费登记联系方式和基本情况。我们长期接触油站投资人、经营者和承租方，可根据您的实际诉求协助匹配意向客户。</p>
-          </div>
-          <form class="message-form" id="assetLeadForm">
-            <div class="grid two">
-              <label class="field"><span>联系人称呼</span><input id="assetContactName" type="text" placeholder="例如：王总 / 李站长"></label>
-              <label class="field"><span>手机号或微信号</span><input id="assetContactMethod" type="text" placeholder="请填写便于联系的方式"></label>
-            </div>
-            <div class="grid two">
-              <label class="field"><span>油站所在省市</span><input id="assetRegion" type="text" placeholder="例如：山东济南"></label>
-              <label class="field"><span>需求类型</span><select id="assetDemandType"><option value="">请选择</option><option>出售</option><option>出租</option><option>整体转让（转租）</option><option>合作经营</option><option>想先了解估值</option></select></label>
-            </div>
-            <div class="grid">
-              <label class="field"><span>油站状态</span><select id="assetStationStatus"><option value="">请选择</option><option>正在营业（自营）</option><option>正在营业（租赁）</option><option>新建未运营</option><option>其他</option></select></label>
-              <label class="field"><span>油站类型</span><select id="assetStationType"><option value="">请选择</option><option>城区站</option><option>国省道站</option><option>乡镇站</option><option>其他</option></select></label>
-              <label class="field"><span>是否有土地证</span><select id="assetLandCert"><option value="">请选择</option><option>有</option><option>没有</option><option>不确定</option><option>不方便透露</option></select></label>
-            </div>
-            <label class="consent-row"><input id="assetConsent" type="checkbox"> <span>我确认以上信息为自愿提交，同意“加油站漫谈”作者或服务团队仅用于油站转让、出租、合作经营等免费推介和沟通对接，不公开展示。</span></label>
-            <button class="btn asset-submit-btn" type="submit">免费登记油站流转需求</button>
-            <div class="lead-status" id="assetLeadStatus">已收到您的信息。正式小程序上线后，这类信息会进入后台，便于作者跟进和匹配意向方。</div>
-            <p class="muted small">H5 预览版会先保存在本机；正式小程序版会写入后台，作者可查看并跟进。</p>
-          </form>
-        </div>
-      </section>
     </section>
 
     <section class="page-view" id="formulaPage">
@@ -1850,22 +1674,6 @@
           </div>
         </section>
 
-        <aside class="section">
-          <div class="section-head">
-            <h2 class="section-title">给作者留言</h2>
-            <span class="section-note">后台可回复</span>
-          </div>
-          <div class="section-body">
-            <form class="message-form" id="messageForm">
-              <label class="field"><span>称呼</span><input id="messageName" type="text" placeholder="例如：王站长"></label>
-              <label class="field"><span>联系方式（选填）</span><input id="messageContact" type="text" placeholder="微信号或手机号，方便作者回复"></label>
-              <label class="field"><span>留言内容</span><textarea id="messageContent" placeholder="可以写公式建议、功能需求、行业口径问题，作者后台看到后可回复。"></textarea></label>
-              <button class="btn" type="submit">提交留言</button>
-              <p class="muted small">H5 预览版会先保存在本机；正式小程序版会写入后台，作者可在后台查看并回复。</p>
-            </form>
-            <div class="message-list" id="messageList"></div>
-          </div>
-        </aside>
       </div>
     </section>
 
@@ -2730,81 +2538,6 @@
       `).join("");
     }
 
-    function renderMessages() {
-      const messages = JSON.parse(localStorage.getItem("gasStationCalcMessages") || "[]");
-      if (!messages.length) {
-        $("messageList").innerHTML = `<p class="muted small">暂无留言。正式小程序上线后，留言会进入作者后台。</p>`;
-        return;
-      }
-      $("messageList").innerHTML = messages.map((item) => `
-        <div class="message-item">
-          <strong>${item.name || "匿名用户"} <span class="muted small">${new Date(item.time).toLocaleString("zh-CN", { hour12: false })}</span></strong>
-          <p>${item.content}</p>
-          <div class="reply-box">作者回复：${item.reply || "暂未回复。正式小程序版将在这里显示后台回复。"}</div>
-        </div>
-      `).join("");
-    }
-
-    function submitMessage(event) {
-      event.preventDefault();
-      const content = $("messageContent").value.trim();
-      if (!content) {
-        $("messageContent").focus();
-        return;
-      }
-      const messages = JSON.parse(localStorage.getItem("gasStationCalcMessages") || "[]");
-      messages.unshift({
-        name: $("messageName").value.trim(),
-        contact: $("messageContact").value.trim(),
-        content,
-        reply: "",
-        time: new Date().toISOString(),
-      });
-      localStorage.setItem("gasStationCalcMessages", JSON.stringify(messages.slice(0, 20)));
-      $("messageContent").value = "";
-      renderMessages();
-    }
-
-    function submitAssetLead(event) {
-      event.preventDefault();
-      const name = $("assetContactName").value.trim();
-      const contact = $("assetContactMethod").value.trim();
-      const demandType = $("assetDemandType").value;
-      if (!name) {
-        $("assetContactName").focus();
-        return;
-      }
-      if (!contact) {
-        $("assetContactMethod").focus();
-        return;
-      }
-      if (!demandType) {
-        $("assetDemandType").focus();
-        return;
-      }
-      if (!$("assetConsent").checked) {
-        $("assetConsent").focus();
-        return;
-      }
-
-      const leads = JSON.parse(localStorage.getItem("gasStationAssetLeads") || "[]");
-      leads.unshift({
-        name,
-        contact,
-        region: $("assetRegion").value.trim(),
-        demandType,
-        stationStatus: $("assetStationStatus").value,
-        stationType: $("assetStationType").value,
-        landCert: $("assetLandCert").value,
-        time: new Date().toISOString(),
-      });
-      localStorage.setItem("gasStationAssetLeads", JSON.stringify(leads.slice(0, 30)));
-
-      $("assetLeadForm").reset();
-      $("assetLeadStatus").classList.add("active");
-      setTimeout(() => $("assetLeadStatus").classList.remove("active"), 4200);
-    }
-
     function drawRoundRect(ctx, x, y, w, h, r) {
       const radius = Math.min(r, w / 2, h / 2);
       ctx.beginPath();
@@ -3395,13 +3128,11 @@
       if (event.key === "Escape") closeStationModal();
     });
     $("clearHistoryBtn").addEventListener("click", () => { localStorage.removeItem("gasStationCalcHistory"); renderHistory(); });
-    $("messageForm").addEventListener("submit", submitMessage);
-    $("assetLeadForm").addEventListener("submit", submitAssetLead);
-
+    localStorage.removeItem("gasStationAssetLeads");
+    localStorage.removeItem("gasStationCalcMessages");
     syncPanels();
     render();
     renderHistory();
-    renderMessages();
   </script>
 </body>
 </html>
